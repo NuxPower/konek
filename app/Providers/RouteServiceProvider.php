@@ -6,5 +6,12 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 
 class RouteServiceProvider extends ServiceProvider
 {
-    // Route service provider logic will go here
+    /**
+     * Define your route model bindings, pattern filters, etc.
+     */
+    public function boot(): void
+    {
+        // Register custom route bindings or patterns here
+        parent::boot();
+    }
 } 

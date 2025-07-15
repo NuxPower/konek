@@ -2,7 +2,22 @@
 
 namespace App\Services;
 
+use App\Models\User;
+use App\Models\ActivityLog;
+
 class ActivityLogService
 {
-    // Activity log service logic will go here
+    /**
+     * Log a user activity.
+     */
+    public function log(User $user, string $description, array $properties = []): void
+    {
+        ActivityLog::create([
+            'log_name' => 'default',
+            'description' => $description,
+            'causer_type' => get_class($user),
+            'causer_id' => $user->id,
+            'properties' => $properties,
+        ]);
+    }
 } 

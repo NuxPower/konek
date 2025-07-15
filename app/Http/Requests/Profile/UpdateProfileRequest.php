@@ -14,7 +14,12 @@ class UpdateProfileRequest extends FormRequest
     public function rules()
     {
         return [
-            // Validation rules for updating profile
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'bio' => 'nullable|string|max:1000',
+            'department' => 'nullable|string|max:255',
+            'year_level' => 'nullable|integer|min:1|max:6',
+            'student_id' => 'nullable|string|max:50',
         ];
     }
 } 

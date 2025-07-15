@@ -14,7 +14,10 @@ class RegisterRequest extends FormRequest
     public function rules()
     {
         return [
-            // Validation rules for registration
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|ends_with:cmu.edu.ph|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:admin,client,freelancer',
         ];
     }
 } 

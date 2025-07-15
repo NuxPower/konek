@@ -159,9 +159,9 @@ Route::middleware(['auth', 'verified'])->prefix('api')->name('api.')->group(func
     Route::get('/dashboard/stats', function () {
         $user = auth()->user();
         return match($user->role) {
-            'admin' => app(AdminDashboardController::class)->getStats(),
-            'client' => app(ClientDashboardController::class)->getStats(),
-            'freelancer' => app(FreelancerDashboardController::class)->getStats(),
+            'admin' => app(AdminDashboardController::class)->getStats(request()),
+            'client' => app(ClientDashboardController::class)->getStats(request()),
+            'freelancer' => app(FreelancerDashboardController::class)->getStats(request()),
             default => response()->json(['error' => 'Unauthorized'], 403)
         };
     })->name('dashboard.stats');

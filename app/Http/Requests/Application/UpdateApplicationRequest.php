@@ -14,7 +14,14 @@ class UpdateApplicationRequest extends FormRequest
     public function rules()
     {
         return [
-            // Validation rules for updating an application
+            'cover_letter' => 'sometimes|required|string',
+            'proposed_rate' => 'nullable|numeric|min:0',
+            'rate_type' => 'nullable|in:hourly,fixed',
+            'estimated_hours' => 'nullable|integer|min:1',
+            'portfolio_links' => 'nullable|string',
+            'attachments' => 'nullable|array',
+            'status' => 'in:pending,reviewing,shortlisted,rejected,accepted,withdrawn',
+            'client_notes' => 'nullable|string',
         ];
     }
 } 

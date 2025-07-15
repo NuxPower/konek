@@ -6,5 +6,11 @@ use Illuminate\Broadcasting\BroadcastServiceProvider as ServiceProvider;
 
 class BroadcastServiceProvider extends ServiceProvider
 {
-    // Broadcast service provider logic will go here
+    /**
+     * Bootstrap any broadcast services.
+     */
+    public function boot(): void
+    {
+        // Register broadcast channels here
+    }
 } 
