@@ -45,4 +45,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * The skills that belong to the user.
+     */
+    public function skills()
+    {
+        return $this->belongsToMany(\App\Models\Skill::class, 'user_skill')
+            ->withTimestamps()
+            ->withPivot(['proficiency_level', 'years_experience']);
+    }
 }
