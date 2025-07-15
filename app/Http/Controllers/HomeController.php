@@ -6,5 +6,11 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    // Home page logic will go here
+    /**
+     * Show the application welcome/landing page.
+     */
+    public function index(Request $request)
+    {
+        return view('welcome');
+    }
 } 

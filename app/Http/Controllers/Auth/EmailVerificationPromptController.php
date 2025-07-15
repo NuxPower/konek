@@ -7,5 +7,11 @@ use Illuminate\Http\Request;
 
 class EmailVerificationPromptController extends Controller
 {
-    // Email verification prompt logic will go here
+    /**
+     * Show the email verification prompt.
+     */
+    public function __invoke(Request $request)
+    {
+        return view('auth.verify-email');
+    }
 } 

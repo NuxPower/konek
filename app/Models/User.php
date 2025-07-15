@@ -21,6 +21,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'phone',
+        'bio',
+        'student_id',
+        'department',
+        'year_level',
+        'is_active',
+        'last_login_at',
     ];
 
     /**
@@ -42,6 +50,9 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'is_active' => 'boolean',
+            'year_level' => 'integer',
             'password' => 'hashed',
         ];
     }
@@ -54,5 +65,21 @@ class User extends Authenticatable
         return $this->belongsToMany(\App\Models\Skill::class, 'user_skill')
             ->withTimestamps()
             ->withPivot(['proficiency_level', 'years_experience']);
+    }
+
+    /**
+     * The jobs posted by the user (if client).
+     */
+    public function jobs()
+    {
+        return $this->hasMany(\App\Models\Job::class, 'client_id');
+    }
+
+    /**
+     * The applications submitted by the user (if freelancer).
+     */
+    public function applications()
+    {
+        return $this->hasMany(\App\Models\Application::class, 'freelancer_id');
     }
 }
