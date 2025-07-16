@@ -1,0 +1,18 @@
+<!-- Freelancer Jobs Show -->
+@extends('layouts.app')
+@section('content')
+<h1>Job Details</h1>
+<ul>
+    <li><strong>Title:</strong> {{ $job->title }}</li>
+    <li><strong>Type:</strong> {{ ucfirst($job->type) }}</li>
+    <li><strong>Status:</strong> {{ ucfirst($job->status) }}</li>
+    <li><strong>Client:</strong> {{ $job->client->name ?? '-' }}</li>
+    <li><strong>Category:</strong> {{ $job->category->name ?? '-' }}</li>
+    <li><strong>Created:</strong> {{ $job->created_at->format('Y-m-d') }}</li>
+</ul>
+<form method="POST" action="{{ route('freelancer.jobs.apply', $job) }}">
+    @csrf
+    <button type="submit">Apply</button>
+</form>
+<a href="{{ route('freelancer.jobs.index') }}">Back to Jobs</a>
+@endsection 

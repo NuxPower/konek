@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Application;
 use Illuminate\Http\Request;
 use App\Services\ApplicationService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ApplicationController extends Controller
 {
+    use AuthorizesRequests;
+
     protected $applicationService;
 
     public function __construct(ApplicationService $applicationService)

@@ -9,9 +9,12 @@ use Illuminate\Http\Request;
 use App\Services\ApplicationService;
 use App\Http\Requests\Application\StoreApplicationRequest;
 use App\Http\Requests\Application\UpdateApplicationRequest;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class JobApplicationController extends Controller
 {
+    use AuthorizesRequests;
+
     protected $applicationService;
 
     public function __construct(ApplicationService $applicationService)

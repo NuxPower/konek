@@ -2,56 +2,59 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProfileUpdateRequest;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\Profile\UpdateProfileRequest;
-use App\Http\Requests\Profile\UpdatePasswordRequest;
-use App\Models\User;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
     /**
-     * Show the form for editing the profile.
+     * Display the user's profile form.
      */
-    public function edit(Request $request)
+    public function edit(Request $request): View
     {
-        $user = $request->user();
-        return view('profile.edit', compact('user'));
+        return view('profile.edit', [
+            'user' => $request->user(),
+        ]);
     }
 
     /**
      * Update the user's profile information.
      */
-    public function update(UpdateProfileRequest $request)
+    public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $user = $request->user();
-        $user->update($request->validated());
-        return redirect()->route('profile.edit')->with('success', 'Profile updated successfully.');
+        $request->user()->fill($request->validated());
+
+        if ($request->user()->isDirty('email')) {
+            $request->user()->email_verified_at = null;
+        }
+
+        $request->user()->save();
+
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
      * Delete the user's account.
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request): RedirectResponse
     {
-        $user = $request->user();
-        Auth::logout();
-        $user->delete();
-        return redirect('/')->with('success', 'Account deleted successfully.');
-    }
-
-    /**
-     * Upload avatar for the user.
-     */
-    public function uploadAvatar(Request $request)
-    {
-        $request->validate([
-            'avatar' => 'required|image|max:2048',
+        $request->validateWithBag('userDeletion', [
+            'password' => ['required', 'current_password'],
         ]);
+
         $user = $request->user();
-        $path = $request->file('avatar')->store('avatars', 'public');
-        $user->avatar = $path;
-        $user->save();
-        return back()->with('success', 'Avatar uploaded successfully.');
+
+        Auth::logout();
+
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return Redirect::to('/');
     }
-} 
+}
