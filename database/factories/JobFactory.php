@@ -60,7 +60,7 @@ class JobFactory extends Factory
             'applications_count' => fake()->numberBetween(0, 50),
             'client_id' => User::factory()->client(),
             'category_id' => Category::factory(),
-            'created_at' => fake()->dateTimeBetween('-2 months', 'now'),
+            'created_at' => fake()->dateTimeBetween('-6 months', 'now'),
             'updated_at' => fake()->dateTimeBetween('-1 month', 'now'),
         ];
     }

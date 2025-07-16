@@ -28,7 +28,7 @@ class UserFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'bio' => fake()->paragraph(3),
             'is_active' => true,
-            'created_at' => now(),
+            'created_at' => fake()->dateTimeBetween('-6 months', 'now'),
             'updated_at' => now(),
         ];
     }
