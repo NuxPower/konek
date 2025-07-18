@@ -51,6 +51,15 @@ return [
     */
 
     'channels' => [
+        // Add this to your config/logging.php file in the 'channels' array
+
+        'activity' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/activity.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14,
+            'replace_placeholders' => true,
+        ],
 
         'stack' => [
             'driver' => 'stack',
