@@ -1,14 +1,8 @@
-<!-- Freelancer Profile Show -->
 @extends('layouts.app')
 @section('content')
-<h1>My Profile</h1>
-<ul>
-    <li><strong>Name:</strong> {{ $user->name }}</li>
-    <li><strong>Email:</strong> {{ $user->email }}</li>
-    <li><strong>Role:</strong> {{ ucfirst($user->role) }}</li>
-    <li><strong>Phone:</strong> {{ $user->phone ?? '-' }}</li>
-    <li><strong>Bio:</strong> {{ $user->bio ?? '-' }}</li>
-    <li><strong>Created:</strong> {{ $user->created_at->format('Y-m-d') }}</li>
-</ul>
-<a href="{{ route('freelancer.profile.edit') }}">Edit Profile</a>
-@endsection 
+<div class="page-header"><div><p class="page-eyebrow">Talent profile</p><h1>{{ $user->name }}</h1><p class="page-subtitle">Your experience and contact information.</p></div><a href="{{ route('freelancer.profile.edit') }}" class="btn btn-primary">Edit profile</a></div>
+<div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+    <section class="panel"><div class="flex items-center gap-4"><div class="grid h-16 w-16 place-items-center rounded-2xl bg-emerald-100 text-xl font-bold text-emerald-800">{{ strtoupper(substr($user->name,0,1)) }}</div><div><p class="text-lg font-semibold text-slate-900">{{ $user->name }}</p><p class="text-sm text-slate-500">{{ $user->email }}</p></div></div><div class="my-7 border-t border-slate-100"></div><h2>About</h2><p class="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">{{ $user->bio ?: 'No bio added yet.' }}</p></section>
+    <aside class="panel"><div class="space-y-5"><div><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Phone</p><p class="mt-1 text-sm text-slate-700">{{ $user->phone ?? 'Not provided' }}</p></div><div><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Department</p><p class="mt-1 text-sm text-slate-700">{{ $user->department ?? 'Not provided' }}</p></div><div><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Year level</p><p class="mt-1 text-sm text-slate-700">{{ $user->year_level ?? 'Not provided' }}</p></div></div></aside>
+</div>
+@endsection

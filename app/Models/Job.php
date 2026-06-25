@@ -72,4 +72,13 @@ class Job extends Model
     {
         return $this->belongsTo(\App\Models\User::class, 'client_id');
     }
-} 
+
+    /**
+     * Freelancers who bookmarked this job.
+     */
+    public function savedByUsers()
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'saved_jobs')
+            ->withTimestamps();
+    }
+}

@@ -16,6 +16,7 @@ class UserManagementController extends Controller
     public function index(Request $request)
     {
         $users = User::query()->paginate(15);
+
         return view('admin.users.index', compact('users'));
     }
 
@@ -37,9 +38,11 @@ class UserManagementController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => ['required', Rule::in(['admin', 'client', 'freelancer'])],
+            'is_active' => 'required|boolean',
         ]);
         $validated['password'] = Hash::make($validated['password']);
         $user = User::create($validated);
+
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
 
@@ -69,13 +72,15 @@ class UserManagementController extends Controller
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'role' => ['required', Rule::in(['admin', 'client', 'freelancer'])],
             'password' => 'nullable|string|min:8|confirmed',
+            'is_active' => 'required|boolean',
         ]);
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);
         }
         $user->update($validated);
+
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
@@ -84,7 +89,15 @@ class UserManagementController extends Controller
      */
     public function destroy(User $user)
     {
+        abort_if($user->is(auth()->user()), 422, 'You cannot delete your own account.');
+        abort_if(
+            $user->role === 'admin' && User::where('role', 'admin')->count() <= 1,
+            422,
+            'The final administrator cannot be deleted.'
+        );
+
         $user->delete();
+
         return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
     }
 
@@ -93,8 +106,16 @@ class UserManagementController extends Controller
      */
     public function toggleStatus(User $user)
     {
-        $user->is_active = !$user->is_active;
+        abort_if($user->is(auth()->user()), 422, 'You cannot deactivate your own account.');
+        abort_if(
+            $user->role === 'admin' && $user->is_active && User::where('role', 'admin')->where('is_active', true)->count() <= 1,
+            422,
+            'The final active administrator cannot be deactivated.'
+        );
+
+        $user->is_active = ! $user->is_active;
         $user->save();
+
         return back()->with('success', 'User status updated.');
     }
-} 
+}

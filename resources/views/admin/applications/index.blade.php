@@ -1,7 +1,9 @@
-<!-- Admin Applications Index -->
 @extends('layouts.app')
 @section('content')
-<h1>Applications</h1>
+<div class="page-header">
+    <div><p class="page-eyebrow">Hiring activity</p><h1>Applications</h1><p class="page-subtitle">Monitor applications submitted across every opportunity.</p></div>
+</div>
+<div class="table-wrap">
 <table class="table">
     <thead>
         <tr>
@@ -13,7 +15,7 @@
         <tr>
             <td>{{ $application->job->title ?? '-' }}</td>
             <td>{{ $application->freelancer->name ?? '-' }}</td>
-            <td>{{ ucfirst($application->status) }}</td>
+            <td><span class="badge {{ $application->status === 'accepted' ? 'badge-success' : 'badge-muted' }}">{{ ucfirst($application->status) }}</span></td>
             <td>
                 <a href="{{ route('admin.applications.show', $application) }}">Show</a>
             </td>
@@ -23,5 +25,6 @@
         @endforelse
     </tbody>
 </table>
+</div>
 {{ $applications->links() }}
-@endsection 
+@endsection

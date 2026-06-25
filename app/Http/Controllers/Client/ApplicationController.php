@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Application;
-use Illuminate\Http\Request;
 use App\Services\ApplicationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
 
 class ApplicationController extends Controller
 {
@@ -24,10 +24,18 @@ class ApplicationController extends Controller
      */
     public function index(Request $request)
     {
-        $applications = Application::whereHas('job', function ($q) use ($request) {
-            $q->where('client_id', $request->user()->id);
-        })->with('job', 'freelancer')->paginate(15);
-        return view('client.applications.index', compact('applications'));
+        $query = Application::whereHas('job', function ($builder) use ($request) {
+            $builder->where('client_id', $request->user()->id);
+        })->with('job', 'freelancer');
+
+        $query
+            ->when($request->filled('status'), fn ($builder) => $builder->where('status', $request->string('status')->toString()))
+            ->when($request->filled('job'), fn ($builder) => $builder->where('job_id', $request->integer('job')));
+
+        $applications = $query->latest()->paginate(15)->withQueryString();
+        $jobs = $request->user()->jobs()->orderBy('title')->get(['id', 'title']);
+
+        return view('client.applications.index', compact('applications', 'jobs'));
     }
 
     /**
@@ -37,6 +45,7 @@ class ApplicationController extends Controller
     {
         $this->authorize('view', $application);
         $application->load('job', 'freelancer');
+
         return view('client.applications.show', compact('application'));
     }
 
@@ -45,12 +54,12 @@ class ApplicationController extends Controller
      */
     public function updateStatus(Request $request, Application $application)
     {
-        $this->authorize('update', $application);
+        $this->authorize('review', $application);
         $request->validate([
-            'status' => 'required|in:pending,reviewing,shortlisted,rejected,accepted,withdrawn',
+            'status' => 'required|in:reviewing,shortlisted,rejected,accepted',
         ]);
-        $application->status = $request->input('status');
-        $application->save();
+        $this->applicationService->changeStatus($application, $request->string('status')->toString());
+
         return back()->with('success', 'Application status updated.');
     }
 
@@ -59,12 +68,13 @@ class ApplicationController extends Controller
      */
     public function addNotes(Request $request, Application $application)
     {
-        $this->authorize('update', $application);
+        $this->authorize('review', $application);
         $request->validate([
-            'client_notes' => 'required|string|max:2000',
+            'client_notes' => 'nullable|string|max:2000',
         ]);
         $application->client_notes = $request->input('client_notes');
         $application->save();
+
         return back()->with('success', 'Notes added to application.');
     }
-} 
+}

@@ -1,27 +1,31 @@
-<!-- Freelancer Applications Index -->
 @extends('layouts.app')
 @section('content')
-<h1>My Applications</h1>
+<div class="page-header">
+    <div><p class="page-eyebrow">Your progress</p><h1>My applications</h1><p class="page-subtitle">Track every opportunity you have applied for.</p></div>
+</div>
+<div class="table-wrap">
 <table class="table">
     <thead>
         <tr>
-            <th>Job</th><th>Status</th><th>Date</th><th>Actions</th>
+            <th>Job</th><th>Client</th><th>Status</th><th>Submitted</th><th>Actions</th>
         </tr>
     </thead>
     <tbody>
         @forelse($applications as $application)
         <tr>
             <td>{{ $application->job->title ?? '-' }}</td>
-            <td>{{ ucfirst($application->status) }}</td>
-            <td>{{ $application->created_at->format('Y-m-d') }}</td>
+            <td>{{ $application->job->client->name ?? '—' }}</td>
+            <td><span class="badge badge-application-{{ $application->status }}">{{ ucfirst($application->status) }}</span></td>
+            <td>{{ $application->created_at->format('M d, Y') }}</td>
             <td>
-                <a href="{{ route('freelancer.applications.show', $application) }}">Show</a>
+                <a href="{{ route('freelancer.applications.show', $application) }}">View</a>
             </td>
         </tr>
         @empty
-        <tr><td colspan="4">No applications found.</td></tr>
+        <tr><td colspan="5" class="empty-state">No applications yet. Browse opportunities to get started.</td></tr>
         @endforelse
     </tbody>
 </table>
+</div>
 {{ $applications->links() }}
-@endsection 
+@endsection

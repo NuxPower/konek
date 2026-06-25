@@ -1,21 +1,22 @@
-<!-- Client Jobs Create -->
 @extends('layouts.app')
+
 @section('content')
-<h1>Add Job</h1>
-<form method="POST" action="#">
+<div class="page-header">
+    <div>
+        <p class="page-eyebrow">New opportunity</p>
+        <h1>Post a job</h1>
+        <p class="page-subtitle">Describe the work clearly, then publish immediately or save it as a draft.</p>
+    </div>
+</div>
+
+<form method="POST" action="{{ route('client.jobs.store') }}">
     @csrf
-    <div style="margin-bottom:1rem;">
-        <label>Title</label>
-        <input type="text" name="title" style="width:100%;">
+    @include('client.jobs._form')
+
+    <div class="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-6">
+        <button type="submit" name="submit_action" value="publish" class="btn btn-primary">Publish job</button>
+        <button type="submit" name="submit_action" value="draft" class="btn btn-secondary">Save draft</button>
+        <a href="{{ route('client.jobs.index') }}" class="ml-auto text-sm font-semibold text-slate-500 hover:text-slate-800">Cancel</a>
     </div>
-    <div style="margin-bottom:1rem;">
-        <label>Status</label>
-        <select name="status" style="width:100%;">
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-        </select>
-    </div>
-    <button type="submit">Create</button>
 </form>
-<a href="{{ route('client.jobs.index') }}">Back to My Jobs</a>
-@endsection 
+@endsection

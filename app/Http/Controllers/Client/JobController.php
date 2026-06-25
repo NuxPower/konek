@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Models\Job;
-use Illuminate\Http\Request;
-use App\Services\JobService;
 use App\Http\Requests\Job\StoreJobRequest;
 use App\Http\Requests\Job\UpdateJobRequest;
+use App\Models\Category;
+use App\Models\Job;
+use App\Models\Skill;
+use App\Services\JobService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
 
 class JobController extends Controller
 {
@@ -26,7 +28,12 @@ class JobController extends Controller
      */
     public function index(Request $request)
     {
-        $jobs = $request->user()->jobs()->with('category')->paginate(15);
+        $jobs = $request->user()->jobs()
+            ->with('category')
+            ->withCount('applications')
+            ->latest()
+            ->paginate(15);
+
         return view('client.jobs.index', compact('jobs'));
     }
 
@@ -35,7 +42,10 @@ class JobController extends Controller
      */
     public function create()
     {
-        return view('client.jobs.create');
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
+        $skills = Skill::where('is_active', true)->orderBy('name')->get();
+
+        return view('client.jobs.create', compact('categories', 'skills'));
     }
 
     /**
@@ -44,10 +54,19 @@ class JobController extends Controller
     public function store(StoreJobRequest $request)
     {
         $data = $request->validated();
+        $submitAction = $data['submit_action'];
+        unset($data['submit_action']);
+
         $data['client_id'] = $request->user()->id;
-        $job = Job::create($data);
-        // Optionally attach skills, etc.
-        return redirect()->route('client.jobs.index')->with('success', 'Job created successfully.');
+        $data['is_featured'] = false;
+        $data['status'] = $submitAction === 'publish' ? 'published' : 'draft';
+        $data['published_at'] = $submitAction === 'publish' ? now() : null;
+
+        $job = $this->jobService->createJob($data);
+
+        return redirect()
+            ->route('client.jobs.show', $job)
+            ->with('success', $submitAction === 'publish' ? 'Job published successfully.' : 'Draft saved successfully.');
     }
 
     /**
@@ -57,6 +76,7 @@ class JobController extends Controller
     {
         $this->authorize('view', $job);
         $job->load('category', 'skills');
+
         return view('client.jobs.show', compact('job'));
     }
 
@@ -67,7 +87,10 @@ class JobController extends Controller
     {
         $this->authorize('update', $job);
         $job->load('category', 'skills');
-        return view('client.jobs.edit', compact('job'));
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
+        $skills = Skill::where('is_active', true)->orderBy('name')->get();
+
+        return view('client.jobs.edit', compact('job', 'categories', 'skills'));
     }
 
     /**
@@ -76,9 +99,10 @@ class JobController extends Controller
     public function update(UpdateJobRequest $request, Job $job)
     {
         $this->authorize('update', $job);
-        $job->update($request->validated());
-        // Optionally update skills, etc.
-        return redirect()->route('client.jobs.index')->with('success', 'Job updated successfully.');
+        $data = $request->validated();
+        $this->jobService->updateJob($job, $data);
+
+        return redirect()->route('client.jobs.show', $job)->with('success', 'Job updated successfully.');
     }
 
     /**
@@ -88,17 +112,23 @@ class JobController extends Controller
     {
         $this->authorize('delete', $job);
         $job->delete();
+
         return redirect()->route('client.jobs.index')->with('success', 'Job deleted successfully.');
     }
 
     /**
      * Toggle the status of a job (e.g., published/paused/closed).
      */
-    public function toggleStatus(Job $job)
+    public function updateStatus(Request $request, Job $job)
     {
         $this->authorize('update', $job);
-        $job->status = $job->status === 'published' ? 'paused' : 'published';
-        $job->save();
+
+        $validated = $request->validate([
+            'status' => 'required|in:draft,published,paused,closed,cancelled',
+        ]);
+
+        $this->jobService->changeStatus($job, $validated['status']);
+
         return back()->with('success', 'Job status updated.');
     }
 
@@ -110,8 +140,16 @@ class JobController extends Controller
         $this->authorize('update', $job);
         $newJob = $job->replicate();
         $newJob->status = 'draft';
+        $newJob->published_at = null;
+        $newJob->applications_count = 0;
+        $newJob->title = $job->title.' (Copy)';
         $newJob->save();
-        // Optionally duplicate relationships (skills, etc.)
+        $newJob->skills()->sync(
+            $job->skills->mapWithKeys(fn ($skill) => [
+                $skill->id => ['proficiency_required' => $skill->pivot->proficiency_required],
+            ])->all()
+        );
+
         return redirect()->route('client.jobs.edit', $newJob)->with('success', 'Job duplicated.');
     }
-} 
+}

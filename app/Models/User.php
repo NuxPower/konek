@@ -83,4 +83,13 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(\App\Models\Application::class, 'freelancer_id');
     }
+
+    /**
+     * Jobs bookmarked by the freelancer.
+     */
+    public function savedJobs()
+    {
+        return $this->belongsToMany(\App\Models\Job::class, 'saved_jobs')
+            ->withTimestamps();
+    }
 }

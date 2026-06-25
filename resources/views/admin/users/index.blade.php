@@ -1,11 +1,13 @@
-<!-- Admin Users Index -->
 @extends('layouts.app')
 @section('content')
-<h1>Users</h1>
-<a href="{{ route('admin.users.create') }}" class="btn btn-primary mb-2">Add User</a>
+<div class="page-header">
+    <div><p class="page-eyebrow">People</p><h1>Users</h1><p class="page-subtitle">Manage access and roles across the KONEK community.</p></div>
+    <a href="{{ route('admin.users.create') }}" class="btn btn-primary">Add user</a>
+</div>
 @if(session('status'))
     <x-alert type="success">{{ session('status') }}</x-alert>
 @endif
+<div class="table-wrap">
 <table class="table">
     <thead>
         <tr>
@@ -17,8 +19,8 @@
         <tr>
             <td>{{ $user->name }}</td>
             <td>{{ $user->email }}</td>
-            <td>{{ ucfirst($user->role) }}</td>
-            <td>{{ $user->is_active ? 'Active' : 'Inactive' }}</td>
+            <td><span class="badge badge-muted">{{ ucfirst($user->role) }}</span></td>
+            <td><span class="badge {{ $user->is_active ? 'badge-success' : 'badge-muted' }}">{{ $user->is_active ? 'Active' : 'Inactive' }}</span></td>
             <td>
                 <a href="{{ route('admin.users.show', $user) }}">Show</a> |
                 <a href="{{ route('admin.users.edit', $user) }}">Edit</a>
@@ -29,5 +31,6 @@
         @endforelse
     </tbody>
 </table>
+</div>
 {{ $users->links() }}
-@endsection 
+@endsection

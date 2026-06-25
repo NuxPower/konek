@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Freelancer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Job;
 use Illuminate\Http\Request;
 
@@ -13,16 +14,21 @@ class JobBrowseController extends Controller
      */
     public function index(Request $request)
     {
-        $jobs = Job::where('status', 'published')->with('category', 'client')->paginate(15);
-        return view('freelancer.jobs.index', compact('jobs'));
+        return $this->renderJobBoard($request);
     }
 
     /**
      * Display the specified job for freelancers (authenticated).
      */
-    public function show(Job $job)
+    public function show(Request $request, Job $job)
     {
+        abort_unless($job->status === 'published', 404);
+
         $job->load('category', 'client', 'skills');
+        $job->loadExists([
+            'savedByUsers as is_saved' => fn ($query) => $query->where('users.id', $request->user()->id),
+        ]);
+
         return view('freelancer.jobs.show', compact('job'));
     }
 
@@ -31,12 +37,7 @@ class JobBrowseController extends Controller
      */
     public function search(Request $request)
     {
-        $query = Job::query()->where('status', 'published');
-        if ($request->filled('q')) {
-            $query->where('title', 'like', '%'.$request->q.'%');
-        }
-        $jobs = $query->with('category', 'client')->paginate(15);
-        return view('freelancer.jobs.search', compact('jobs'));
+        return $this->renderJobBoard($request);
     }
 
     /**
@@ -45,6 +46,7 @@ class JobBrowseController extends Controller
     public function publicIndex(Request $request)
     {
         $jobs = Job::where('status', 'published')->with('category', 'client')->paginate(15);
+
         return view('jobs.index', compact('jobs'));
     }
 
@@ -53,7 +55,10 @@ class JobBrowseController extends Controller
      */
     public function publicShow(Job $job)
     {
+        abort_unless($job->status === 'published', 404);
+
         $job->load('category', 'client', 'skills');
+
         return view('jobs.show', compact('job'));
     }
 
@@ -67,6 +72,7 @@ class JobBrowseController extends Controller
             $query->where('title', 'like', '%'.$request->q.'%');
         }
         $jobs = $query->with('category', 'client')->paginate(15);
+
         return view('jobs.search', compact('jobs'));
     }
 
@@ -80,6 +86,44 @@ class JobBrowseController extends Controller
             $query->where('title', 'like', '%'.$request->q.'%');
         }
         $jobs = $query->with('category', 'client')->paginate(15);
+
         return response()->json($jobs);
     }
-} 
+
+    private function renderJobBoard(Request $request)
+    {
+        $query = Job::query()
+            ->where('status', 'published')
+            ->with(['category', 'client', 'skills'])
+            ->withExists([
+                'savedByUsers as is_saved' => fn ($builder) => $builder->where('users.id', $request->user()->id),
+            ]);
+
+        if ($request->filled('q')) {
+            $search = $request->string('q')->trim();
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhereHas('client', fn ($client) => $client->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('skills', fn ($skill) => $skill->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        $query
+            ->when($request->filled('category'), fn ($builder) => $builder->where('category_id', $request->integer('category')))
+            ->when($request->filled('type'), fn ($builder) => $builder->where('type', $request->string('type')->toString()))
+            ->when($request->filled('experience'), fn ($builder) => $builder->where('experience_level', $request->string('experience')->toString()));
+
+        match ($request->string('sort')->toString()) {
+            'deadline' => $query->orderByRaw('deadline IS NULL, deadline ASC'),
+            'budget' => $query->orderByDesc('budget_max'),
+            default => $query->latest(),
+        };
+
+        $jobs = $query->paginate(12)->withQueryString();
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
+
+        return view('freelancer.jobs.index', compact('jobs', 'categories'));
+    }
+}

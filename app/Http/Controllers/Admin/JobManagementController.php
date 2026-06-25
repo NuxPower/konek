@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Job;
-use Illuminate\Http\Request;
+use App\Models\User;
 use App\Services\JobService;
-use App\Http\Requests\Job\UpdateJobRequest;
+use Illuminate\Http\Request;
 
 class JobManagementController extends Controller
 {
@@ -23,6 +24,7 @@ class JobManagementController extends Controller
     public function index(Request $request)
     {
         $jobs = Job::with('category', 'client')->paginate(15);
+
         return view('admin.jobs.index', compact('jobs'));
     }
 
@@ -32,6 +34,7 @@ class JobManagementController extends Controller
     public function show(Job $job)
     {
         $job->load('category', 'client', 'skills');
+
         return view('admin.jobs.show', compact('job'));
     }
 
@@ -41,16 +44,35 @@ class JobManagementController extends Controller
     public function edit(Job $job)
     {
         $job->load('category', 'client', 'skills');
-        return view('admin.jobs.edit', compact('job'));
+        $clients = User::where('role', 'client')->where('is_active', true)->orderBy('name')->get();
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
+
+        return view('admin.jobs.edit', compact('job', 'clients', 'categories'));
     }
 
     /**
      * Update the specified job in storage.
      */
-    public function update(UpdateJobRequest $request, Job $job)
+    public function update(Request $request, Job $job)
     {
-        $job->update($request->validated());
-        // Optionally update skills, etc.
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|min:30',
+            'requirements' => 'required|string|min:20',
+            'client_id' => 'required|exists:users,id',
+            'category_id' => 'required|exists:categories,id',
+            'type' => 'required|in:full-time,part-time,contract,internship',
+            'experience_level' => 'required|in:entry,intermediate,expert',
+            'budget_min' => 'nullable|numeric|min:0',
+            'budget_max' => 'nullable|numeric|min:0|gte:budget_min',
+            'budget_type' => 'required|in:hourly,fixed,negotiable',
+            'status' => 'required|in:draft,published,paused,closed,cancelled',
+            'deadline' => 'nullable|date',
+            'max_applications' => 'nullable|integer|min:1',
+        ]);
+
+        $job->update($validated);
+
         return redirect()->route('admin.jobs.index')->with('success', 'Job updated successfully.');
     }
 
@@ -60,6 +82,7 @@ class JobManagementController extends Controller
     public function destroy(Job $job)
     {
         $job->delete();
+
         return redirect()->route('admin.jobs.index')->with('success', 'Job deleted successfully.');
     }
 
@@ -70,6 +93,7 @@ class JobManagementController extends Controller
     {
         $job->status = $job->status === 'published' ? 'paused' : 'published';
         $job->save();
+
         return back()->with('success', 'Job status updated.');
     }
-} 
+}

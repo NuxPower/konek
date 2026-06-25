@@ -9,28 +9,43 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+        <div class="min-h-screen">
             @include('layouts.navigation')
 
-            <!-- Page Heading -->
-            @hasSection('header')
+            @if(isset($header) || View::hasSection('header'))
                 <header class="bg-white shadow">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header ?? '' }}
                         @yield('header')
                     </div>
                 </header>
             @endif
 
-            <!-- Page Content -->
-            <main>
-                @yield('content')
-            </main>
+            <div class="app-shell">
+                @include('layouts.sidebar')
+
+                <main class="app-content">
+                    @include('layouts.breadcrumbs')
+
+                    @if(session('success'))
+                        <x-alert type="success">{{ session('success') }}</x-alert>
+                    @endif
+
+                    @if(isset($slot))
+                        {{ $slot }}
+                    @else
+                        @yield('content')
+                    @endif
+                </main>
+            </div>
         </div>
+
+        @stack('scripts')
     </body>
 </html>

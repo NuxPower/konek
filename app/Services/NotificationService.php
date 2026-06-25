@@ -3,15 +3,27 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Notifications\InAppNotification;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Notification;
 
 class NotificationService
 {
     /**
      * Send a notification to a user or users.
      */
-    public function send(User|array $users, string $message, array $data = []): void
+    public function send(User|array|Collection $users, string $message, array $data = []): void
     {
-        // Stub: Replace with real notification logic
+        $recipients = $users instanceof User ? collect([$users]) : collect($users);
+
+        if ($recipients->isEmpty()) {
+            return;
+        }
+
+        Notification::send(
+            $recipients,
+            new InAppNotification($data['title'] ?? 'KONEK update', $message, $data)
+        );
     }
 
     /**
@@ -29,4 +41,4 @@ class NotificationService
     {
         $this->send($users, $message, $data);
     }
-} 
+}

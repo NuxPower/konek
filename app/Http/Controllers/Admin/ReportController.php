@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Services\ReportService;
+use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
@@ -20,8 +20,7 @@ class ReportController extends Controller
      */
     public function index(Request $request)
     {
-        // Show a summary or selection of reports
-        return view('admin.reports.index');
+        return view('admin.reports.index', $this->reportService->summary());
     }
 
     /**
@@ -29,8 +28,10 @@ class ReportController extends Controller
      */
     public function jobs(Request $request)
     {
-        // Example: $data = $this->reportService->getJobReport($request->all());
-        return view('admin.reports.jobs');
+        $filters = $this->filters($request, 'jobs');
+        $jobs = $this->reportService->jobQuery($filters)->paginate(20)->withQueryString();
+
+        return view('admin.reports.jobs', compact('jobs', 'filters'));
     }
 
     /**
@@ -38,8 +39,10 @@ class ReportController extends Controller
      */
     public function applications(Request $request)
     {
-        // Example: $data = $this->reportService->getApplicationReport($request->all());
-        return view('admin.reports.applications');
+        $filters = $this->filters($request, 'applications');
+        $applications = $this->reportService->applicationQuery($filters)->paginate(20)->withQueryString();
+
+        return view('admin.reports.applications', compact('applications', 'filters'));
     }
 
     /**
@@ -47,17 +50,43 @@ class ReportController extends Controller
      */
     public function users(Request $request)
     {
-        // Example: $data = $this->reportService->getUserReport($request->all());
-        return view('admin.reports.users');
+        $filters = $this->filters($request, 'users');
+        $users = $this->reportService->userQuery($filters)->paginate(20)->withQueryString();
+
+        return view('admin.reports.users', compact('users', 'filters'));
     }
 
-    /**
-     * Export a report (PDF/Excel).
-     */
     public function export(Request $request)
     {
-        // Example: $file = $this->reportService->export($request->all());
-        // return response()->download($file);
-        return back()->with('success', 'Report exported (stub).');
+        $validated = $request->validate([
+            'report' => 'required|in:users,jobs,applications',
+            'status' => 'nullable|string|max:30',
+            'role' => 'nullable|in:admin,client,freelancer',
+            'active' => 'nullable|in:0,1',
+            'type' => 'nullable|in:full-time,part-time,contract,internship',
+            'from' => 'nullable|date',
+            'to' => 'nullable|date|after_or_equal:from',
+        ]);
+
+        $report = $validated['report'];
+        unset($validated['report']);
+
+        return $this->reportService->export($report, $validated);
     }
-} 
+
+    private function filters(Request $request, string $report): array
+    {
+        $rules = [
+            'from' => 'nullable|date',
+            'to' => 'nullable|date|after_or_equal:from',
+        ];
+
+        $rules += match ($report) {
+            'users' => ['role' => 'nullable|in:admin,client,freelancer', 'active' => 'nullable|in:0,1'],
+            'jobs' => ['status' => 'nullable|in:draft,published,closed,cancelled', 'type' => 'nullable|in:full-time,part-time,contract,internship'],
+            'applications' => ['status' => 'nullable|in:pending,reviewing,shortlisted,accepted,rejected,withdrawn'],
+        };
+
+        return $request->validate($rules);
+    }
+}

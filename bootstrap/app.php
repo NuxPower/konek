@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\ActivityLogger;
+use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\ValidateCMUEmail;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -11,8 +14,21 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->append(ActivityLogger::class);
+
+        $middleware->alias([
+            'role' => CheckRole::class,
+            'cmu_email' => ValidateCMUEmail::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->respond(function ($response) {
+            if ($response->getStatusCode() === 419) {
+                return redirect()
+                    ->route('login')
+                    ->with('status', 'Your session expired. Please log in again.');
+            }
+
+            return $response;
+        });
     })->create();

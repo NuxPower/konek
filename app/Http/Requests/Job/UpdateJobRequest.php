@@ -8,25 +8,27 @@ class UpdateJobRequest extends FormRequest
 {
     public function authorize()
     {
-        return true;
+        $job = $this->route('job');
+
+        return $job && $this->user()?->can('update', $job);
     }
 
     public function rules()
     {
         return [
-            'title' => 'sometimes|required|string|max:255',
-            'description' => 'sometimes|required|string',
-            'requirements' => 'sometimes|required|string',
-            'category_id' => 'sometimes|required|exists:categories,id',
-            'type' => 'sometimes|required|in:full-time,part-time,contract,internship',
-            'experience_level' => 'sometimes|required|in:entry,intermediate,expert',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|min:30',
+            'requirements' => 'required|string|min:20',
+            'category_id' => 'required|exists:categories,id',
+            'type' => 'required|in:full-time,part-time,contract,internship',
+            'experience_level' => 'required|in:entry,intermediate,expert',
             'budget_min' => 'nullable|numeric|min:0',
-            'budget_max' => 'nullable|numeric|min:0',
-            'budget_type' => 'sometimes|required|in:hourly,fixed,negotiable',
+            'budget_max' => 'nullable|numeric|min:0|gte:budget_min',
+            'budget_type' => 'required|in:hourly,fixed,negotiable',
             'deadline' => 'nullable|date|after:today',
             'max_applications' => 'nullable|integer|min:1',
-            'is_featured' => 'boolean',
-            'attachments' => 'nullable|array',
+            'skills' => 'nullable|array|max:12',
+            'skills.*' => 'integer|distinct|exists:skills,id',
         ];
     }
-} 
+}

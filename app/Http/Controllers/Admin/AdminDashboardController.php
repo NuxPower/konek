@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Job;
-use App\Models\Application;
 use App\Models\ActivityLog;
-use Illuminate\Support\Facades\DB;
+use App\Models\Application;
+use App\Models\Job;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
 {
@@ -18,38 +17,60 @@ class AdminDashboardController extends Controller
     public function index(Request $request)
     {
         $totalUsers = User::count();
-        $totalAdmins = User::where('role', 'admin')->count();
+        $activeUsers = User::where('is_active', true)->count();
         $totalClients = User::where('role', 'client')->count();
         $totalFreelancers = User::where('role', 'freelancer')->count();
         $totalJobs = Job::count();
+        $publishedJobs = Job::where('status', 'published')->count();
         $totalApplications = Application::count();
-        $recentUsers = User::latest()->take(5)->get();
-        $recentJobs = Job::latest()->take(5)->get();
-        $recentApplications = Application::latest()->with('job', 'freelancer')->take(5)->get();
+        $applicationsNeedingReview = Application::whereIn('status', ['pending', 'reviewing'])->count();
+        $acceptedApplications = Application::where('status', 'accepted')->count();
+        $acceptanceRate = $totalApplications > 0
+            ? round(($acceptedApplications / $totalApplications) * 100)
+            : 0;
+
+        $reviewQueue = Application::query()
+            ->whereIn('status', ['pending', 'reviewing'])
+            ->with(['job.client', 'freelancer'])
+            ->latest()
+            ->take(6)
+            ->get();
+        $upcomingDeadlines = Job::query()
+            ->where('status', 'published')
+            ->whereBetween('deadline', [now(), now()->addDays(14)])
+            ->with('client')
+            ->withCount('applications')
+            ->orderBy('deadline')
+            ->take(6)
+            ->get();
+        $jobStatusCounts = Job::query()
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+        $applicationStatusCounts = Application::query()
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
         $recentActivities = ActivityLog::with('causer')->latest()->take(5)->get();
 
-        // Monthly user registrations (last 6 months)
-        $userTrends = User::select(DB::raw("DATE_FORMAT(created_at, '%b %Y') as month"), DB::raw('count(*) as count'))
-            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
-            ->groupBy('month')
-            ->orderByRaw("MIN(created_at)")
-            ->pluck('count', 'month');
-        $jobTrends = Job::select(DB::raw("DATE_FORMAT(created_at, '%b %Y') as month"), DB::raw('count(*) as count'))
-            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
-            ->groupBy('month')
-            ->orderByRaw("MIN(created_at)")
-            ->pluck('count', 'month');
-        // Fill missing months with 0
-        $months = collect(range(0, 5))->map(function($i) {
-            return now()->subMonths(5 - $i)->format('M Y');
+        $periods = collect(range(0, 5))->map(function ($i) {
+            $start = now()->subMonths(5 - $i)->startOfMonth();
+
+            return [
+                'label' => $start->format('M Y'),
+                'start' => $start,
+                'end' => $start->copy()->endOfMonth(),
+            ];
         });
-        $userTrendData = $months->map(fn($m) => $userTrends[$m] ?? 0);
-        $jobTrendData = $months->map(fn($m) => $jobTrends[$m] ?? 0);
+        $months = $periods->pluck('label');
+        $userTrendData = $periods->map(fn ($period) => User::whereBetween('created_at', [$period['start'], $period['end']])->count());
+        $jobTrendData = $periods->map(fn ($period) => Job::whereBetween('created_at', [$period['start'], $period['end']])->count());
 
         return view('admin.dashboard', compact(
-            'totalUsers', 'totalAdmins', 'totalClients', 'totalFreelancers',
-            'totalJobs', 'totalApplications',
-            'recentUsers', 'recentJobs', 'recentApplications', 'recentActivities',
+            'totalUsers', 'activeUsers', 'totalClients', 'totalFreelancers',
+            'totalJobs', 'publishedJobs', 'totalApplications', 'applicationsNeedingReview',
+            'acceptedApplications', 'acceptanceRate', 'reviewQueue', 'upcomingDeadlines',
+            'jobStatusCounts', 'applicationStatusCounts', 'recentActivities',
             'months', 'userTrendData', 'jobTrendData'
         ));
     }
@@ -59,12 +80,13 @@ class AdminDashboardController extends Controller
      */
     public function getStats(Request $request)
     {
-        // Example stats (replace with real queries)
-        $stats = [
-            'users' => 100,
-            'jobs' => 50,
-            'applications' => 200,
-        ];
-        return response()->json($stats);
+        return response()->json([
+            'users' => User::count(),
+            'active_users' => User::where('is_active', true)->count(),
+            'jobs' => Job::count(),
+            'published_jobs' => Job::where('status', 'published')->count(),
+            'applications' => Application::count(),
+            'applications_needing_review' => Application::whereIn('status', ['pending', 'reviewing'])->count(),
+        ]);
     }
-} 
+}

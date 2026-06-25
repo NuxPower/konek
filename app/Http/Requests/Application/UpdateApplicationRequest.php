@@ -8,20 +8,19 @@ class UpdateApplicationRequest extends FormRequest
 {
     public function authorize()
     {
-        return true;
+        $application = $this->route('application');
+
+        return $application && $this->user()?->can('update', $application);
     }
 
     public function rules()
     {
         return [
-            'cover_letter' => 'sometimes|required|string',
+            'cover_letter' => 'required|string|min:50|max:5000',
             'proposed_rate' => 'nullable|numeric|min:0',
-            'rate_type' => 'nullable|in:hourly,fixed',
+            'rate_type' => 'nullable|required_with:proposed_rate|in:hourly,fixed',
             'estimated_hours' => 'nullable|integer|min:1',
-            'portfolio_links' => 'nullable|string',
-            'attachments' => 'nullable|array',
-            'status' => 'in:pending,reviewing,shortlisted,rejected,accepted,withdrawn',
-            'client_notes' => 'nullable|string',
+            'portfolio_links' => 'nullable|string|max:2000',
         ];
     }
-} 
+}

@@ -19,6 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Add global settings, macros, or custom boot logic here
+        //
     }
 }

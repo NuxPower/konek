@@ -1,5 +1,2 @@
-<!-- 500 Error view -->
-@extends('layouts.guest')
-@section('content')
-<h1>500 Server Error</h1>
-@endsection 
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Server error</title>@vite(['resources/css/app.css','resources/js/app.js'])</head>
+<body class="grid min-h-screen place-items-center bg-[#f7f8f4] p-6"><main class="w-full max-w-md text-center"><x-application-logo class="mx-auto h-12 w-12 text-[#176b4d]"/><p class="mt-8 text-xs font-semibold uppercase tracking-[.18em] text-[#2f7d5f]">500</p><h1 class="mt-3">Something went wrong</h1><p class="mt-3 text-sm leading-6 text-slate-500">The server could not complete this request. Please try again.</p><a class="landing-primary-button mt-7" href="{{ url('/') }}">Return home</a></main></body></html>
