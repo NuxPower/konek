@@ -44,11 +44,11 @@ class AdminDashboardController extends Controller
             ->take(6)
             ->get();
         $jobStatusCounts = Job::query()
-            ->select('status', DB::raw('count(*) as total'))
+            ->selectRaw('status, count(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
         $applicationStatusCounts = Application::query()
-            ->select('status', DB::raw('count(*) as total'))
+            ->selectRaw('status, count(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
         $recentActivities = ActivityLog::with('causer')->latest()->take(5)->get();

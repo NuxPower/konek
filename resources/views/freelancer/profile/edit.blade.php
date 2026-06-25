@@ -10,4 +10,23 @@
     @if($errors->any())<x-alert type="error">{{ $errors->first() }}</x-alert>@endif
     <x-primary-button>Save profile</x-primary-button>
 </form>
+
+<section class="panel max-w-2xl">
+    <h2>Resume</h2>
+    <p class="mt-2 text-sm text-slate-500">Upload a PDF or Word document. Resumes are stored privately and limited to 4 MB.</p>
+    <form method="POST" action="{{ route('freelancer.profile.resume') }}" enctype="multipart/form-data" class="mt-5 !mb-0 !border-0 !p-0 !shadow-none">
+        @csrf
+        <div>
+            <label for="resume">Resume file</label>
+            <input id="resume" type="file" name="resume" accept=".pdf,.doc,.docx" required>
+            <x-input-error :messages="$errors->get('resume')" class="mt-2" />
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <x-primary-button>Upload resume</x-primary-button>
+            @if($user->resume_path)
+                <a href="{{ route('freelancer.profile.resume.download') }}" class="btn btn-secondary">Download current resume</a>
+            @endif
+        </div>
+    </form>
+</section>
 @endsection

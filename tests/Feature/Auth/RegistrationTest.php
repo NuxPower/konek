@@ -20,12 +20,30 @@ class RegistrationTest extends TestCase
     {
         $response = $this->post('/register', [
             'name' => 'Test User',
-            'email' => 'test@example.com',
+            'email' => 'test@cmu.edu.ph',
+            'role' => 'client',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 
         $this->assertAuthenticated();
+        $this->assertDatabaseHas('users', [
+            'email' => 'test@cmu.edu.ph',
+            'role' => 'client',
+        ]);
         $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_registration_rejects_non_cmu_email_and_admin_role(): void
+    {
+        $this->post('/register', [
+            'name' => 'Outside User',
+            'email' => 'outside@example.com',
+            'role' => 'admin',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertSessionHasErrors(['email', 'role']);
+
+        $this->assertGuest();
     }
 }

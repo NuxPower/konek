@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Freelancer;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\Profile\UpdateProfileRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FreelancerProfileController extends Controller
 {
@@ -14,6 +16,7 @@ class FreelancerProfileController extends Controller
     public function show(Request $request)
     {
         $user = $request->user();
+
         return view('freelancer.profile.show', compact('user'));
     }
 
@@ -23,6 +26,7 @@ class FreelancerProfileController extends Controller
     public function edit(Request $request)
     {
         $user = $request->user();
+
         return view('freelancer.profile.edit', compact('user'));
     }
 
@@ -33,6 +37,7 @@ class FreelancerProfileController extends Controller
     {
         $user = $request->user();
         $user->update($request->validated());
+
         return redirect()->route('freelancer.profile.show')->with('success', 'Profile updated successfully.');
     }
 
@@ -42,12 +47,31 @@ class FreelancerProfileController extends Controller
     public function uploadResume(Request $request)
     {
         $request->validate([
-            'resume' => 'required|mimes:pdf,doc,docx|max:4096',
+            'resume' => ['required', 'file', 'mimes:pdf,doc,docx', 'max:4096'],
         ]);
         $user = $request->user();
-        $path = $request->file('resume')->store('resumes', 'public');
-        $user->resume = $path;
+
+        if ($user->resume_path) {
+            Storage::disk('local')->delete($user->resume_path);
+        }
+
+        $path = $request->file('resume')->store("resumes/{$user->id}", 'local');
+        $user->resume_path = $path;
         $user->save();
+
         return back()->with('success', 'Resume uploaded successfully.');
     }
-} 
+
+    public function downloadResume(Request $request): StreamedResponse
+    {
+        abort_unless(
+            $request->user()->resume_path && Storage::disk('local')->exists($request->user()->resume_path),
+            404
+        );
+
+        return Storage::disk('local')->download(
+            $request->user()->resume_path,
+            'konek-resume.'.pathinfo($request->user()->resume_path, PATHINFO_EXTENSION)
+        );
+    }
+}

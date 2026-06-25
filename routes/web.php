@@ -110,6 +110,7 @@ Route::middleware(['auth', 'verified', 'role:freelancer'])
         Route::get('/profile/edit', [FreelancerProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [FreelancerProfileController::class, 'update'])->name('profile.update');
         Route::post('/profile/resume', [FreelancerProfileController::class, 'uploadResume'])->name('profile.resume');
+        Route::get('/profile/resume', [FreelancerProfileController::class, 'downloadResume'])->name('profile.resume.download');
     });
 
 require __DIR__.'/auth.php';

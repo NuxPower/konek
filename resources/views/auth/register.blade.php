@@ -27,6 +27,15 @@
         </div>
 
         <div>
+            <x-input-label for="role" value="I want to" />
+            <select id="role" name="role" class="mt-2" required>
+                <option value="freelancer" @selected(old('role', 'freelancer') === 'freelancer')>Find work as talent</option>
+                <option value="client" @selected(old('role') === 'client')>Post jobs as a client</option>
+            </select>
+            <x-input-error :messages="$errors->get('role')" class="mt-2" />
+        </div>
+
+        <div>
             <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
 
             <x-text-input id="password_confirmation" class="mt-2 block w-full"

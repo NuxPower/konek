@@ -2,10 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\ActivityLogService;
 use Closure;
 use Illuminate\Http\Request;
-use App\Services\ActivityLogService;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class ActivityLogger
 {
@@ -16,19 +17,21 @@ class ActivityLogger
         $this->activityLogService = $activityLogService;
     }
 
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
-        if (Auth::check()) {
+
+        if (Auth::check() && ! $request->isMethodSafe() && $response->getStatusCode() < 400) {
             $this->activityLogService->log(
                 Auth::user(),
-                $request->method() . ' ' . $request->path(),
+                $request->method().' '.$request->path(),
                 [
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]
             );
         }
+
         return $response;
     }
-} 
+}
