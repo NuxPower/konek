@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Skill;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -14,15 +14,17 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $demoPassword = env('KONEK_DEMO_PASSWORD', 'password');
+
         // Create default admin user
-        $admin = User::firstOrCreate(
+        User::updateOrCreate(
             [
                 'email' => 'admin@cmu.edu.ph',
             ],
             [
                 'name' => 'System Administrator',
                 'email_verified_at' => now(),
-                'password' => Hash::make('password'),
+                'password' => Hash::make($demoPassword),
                 'role' => 'admin',
                 'phone' => '+63 912 345 6789',
                 'bio' => 'System administrator for KONEK platform.',
@@ -31,14 +33,14 @@ class UserSeeder extends Seeder
         );
 
         // Create default client user
-        $client = User::firstOrCreate(
+        User::updateOrCreate(
             [
                 'email' => 'client@cmu.edu.ph',
             ],
             [
                 'name' => 'John Client',
                 'email_verified_at' => now(),
-                'password' => Hash::make('password'),
+                'password' => Hash::make($demoPassword),
                 'role' => 'client',
                 'phone' => '+63 917 123 4567',
                 'bio' => 'Client user for KONEK platform.',
@@ -47,14 +49,14 @@ class UserSeeder extends Seeder
         );
 
         // Create default freelancer user
-        $freelancer = User::firstOrCreate(
+        User::updateOrCreate(
             [
                 'email' => 'freelancer@cmu.edu.ph',
             ],
             [
                 'name' => 'Jane Freelancer',
                 'email_verified_at' => now(),
-                'password' => Hash::make('password'),
+                'password' => Hash::make($demoPassword),
                 'role' => 'freelancer',
                 'phone' => '+63 998 765 4321',
                 'bio' => 'Freelancer user for KONEK platform.',
@@ -76,6 +78,15 @@ class UserSeeder extends Seeder
             ->cmuEmail()
             ->create();
 
+        $skillIds = Skill::where('is_active', true)->pluck('id');
+        User::where('role', 'freelancer')->get()->each(function (User $user) use ($skillIds) {
+            if ($skillIds->count() >= 3) {
+                $user->skills()->syncWithoutDetaching(
+                    $skillIds->random(min(6, $skillIds->count()))
+                );
+            }
+        });
+
         // Create some inactive users
         User::factory()
             ->count(5)
@@ -89,7 +100,6 @@ class UserSeeder extends Seeder
             ->unverified()
             ->create();
 
-        // Attach skills to freelancers after skills are created
-        $this->command->info('User seeding completed. Skills will be attached after SkillSeeder runs.');
+        $this->command->info("Demo users seeded. Shared password: {$demoPassword}");
     }
 }

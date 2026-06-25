@@ -12,11 +12,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            UserSeeder::class,
             CategorySeeder::class,
             SkillSeeder::class,
-            JobSeeder::class,
-            ApplicationSeeder::class,
         ]);
+
+        if (! app()->environment('production') || env('KONEK_SEED_DEMO', false)) {
+            $this->call([
+                UserSeeder::class,
+                JobSeeder::class,
+                ApplicationSeeder::class,
+            ]);
+        }
     }
 }

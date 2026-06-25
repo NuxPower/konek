@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Application;
 use App\Models\Job;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class ApplicationSeeder extends Seeder
 {
@@ -21,19 +21,19 @@ class ApplicationSeeder extends Seeder
         // Create applications for published jobs
         foreach ($publishedJobs as $job) {
             $applicationsCount = rand(1, 8); // Random number of applications per job
-            
+
             for ($i = 0; $i < $applicationsCount; $i++) {
                 $freelancer = $freelancers->random();
-                
+
                 // Check if freelancer already applied to this job
                 $existingApplication = Application::where('freelancer_id', $freelancer->id)
                     ->where('job_id', $job->id)
                     ->first();
-                
-                if (!$existingApplication) {
+
+                if (! $existingApplication) {
                     // Create different types of applications
                     $rand = rand(1, 100);
-                    
+
                     if ($rand <= 40) {
                         // 40% pending applications
                         $application = Application::factory()
@@ -43,7 +43,7 @@ class ApplicationSeeder extends Seeder
                                 'job_id' => $job->id,
                             ]);
                     } elseif ($rand <= 60) {
-                        // 20% reviewing applications  
+                        // 20% reviewing applications
                         $application = Application::factory()
                             ->reviewing()
                             ->create([
@@ -85,7 +85,7 @@ class ApplicationSeeder extends Seeder
                     }
                 }
             }
-            
+
             // Update job applications count
             $job->applications_count = $job->applications()->count();
             $job->save();
@@ -94,18 +94,18 @@ class ApplicationSeeder extends Seeder
         // Create applications for closed jobs (these should be completed or rejected)
         foreach ($closedJobs as $job) {
             $applicationsCount = rand(3, 12); // More applications for closed jobs
-            
+
             for ($i = 0; $i < $applicationsCount; $i++) {
                 $freelancer = $freelancers->random();
-                
+
                 // Check if freelancer already applied to this job
                 $existingApplication = Application::where('freelancer_id', $freelancer->id)
                     ->where('job_id', $job->id)
                     ->first();
-                
-                if (!$existingApplication) {
+
+                if (! $existingApplication) {
                     $rand = rand(1, 100);
-                    
+
                     if ($rand <= 20) {
                         // 20% completed applications
                         $application = Application::factory()
@@ -133,7 +133,7 @@ class ApplicationSeeder extends Seeder
                     }
                 }
             }
-            
+
             // Update job applications count
             $job->applications_count = $job->applications()->count();
             $job->save();
@@ -162,7 +162,7 @@ class ApplicationSeeder extends Seeder
                 'portfolio_links' => json_encode([
                     'https://github.com/developer/laravel-inventory',
                     'https://portfolio.example.com/laravel-projects',
-                    'https://demo.inventoryapp.com'
+                    'https://demo.inventoryapp.com',
                 ]),
             ],
             [
@@ -173,7 +173,7 @@ class ApplicationSeeder extends Seeder
                 'portfolio_links' => json_encode([
                     'https://behance.net/designer/mobile-designs',
                     'https://figma.com/food-app-design',
-                    'https://dribbble.com/shots/mobile-ui'
+                    'https://dribbble.com/shots/mobile-ui',
                 ]),
             ],
             [
@@ -184,23 +184,27 @@ class ApplicationSeeder extends Seeder
                 'portfolio_links' => json_encode([
                     'https://medium.com/@techwriter/articles',
                     'https://dev.to/techwriter',
-                    'https://techblog.example.com/author/writer'
+                    'https://techblog.example.com/author/writer',
                 ]),
             ],
         ];
 
         foreach ($sampleApplications as $index => $applicationData) {
             if (isset($freelancers[$index]) && isset($jobs[$index])) {
-                Application::create([
-                    'freelancer_id' => $freelancers[$index]->id,
-                    'job_id' => $jobs[$index]->id,
-                    'cover_letter' => $applicationData['cover_letter'],
-                    'proposed_rate' => $applicationData['proposed_rate'],
-                    'estimated_hours' => $applicationData['estimated_hours'],
-                    'status' => $applicationData['status'],
-                    'portfolio_links' => $applicationData['portfolio_links'],
-                    'reviewed_at' => in_array($applicationData['status'], ['shortlisted', 'accepted', 'rejected']) ? now() : null,
-                ]);
+                Application::updateOrCreate(
+                    [
+                        'freelancer_id' => $freelancers[$index]->id,
+                        'job_id' => $jobs[$index]->id,
+                    ],
+                    [
+                        'cover_letter' => $applicationData['cover_letter'],
+                        'proposed_rate' => $applicationData['proposed_rate'],
+                        'estimated_hours' => $applicationData['estimated_hours'],
+                        'status' => $applicationData['status'],
+                        'portfolio_links' => $applicationData['portfolio_links'],
+                        'reviewed_at' => in_array($applicationData['status'], ['shortlisted', 'accepted', 'rejected']) ? now() : null,
+                    ]
+                );
             }
         }
     }
