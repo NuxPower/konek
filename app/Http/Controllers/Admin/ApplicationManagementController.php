@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Application;
-use Illuminate\Http\Request;
-use App\Services\ApplicationService;
 use App\Http\Requests\Application\UpdateApplicationRequest;
+use App\Models\Application;
+use App\Services\ApplicationService;
+use Illuminate\Http\Request;
 
 class ApplicationManagementController extends Controller
 {
@@ -23,6 +23,7 @@ class ApplicationManagementController extends Controller
     public function index(Request $request)
     {
         $applications = Application::with('job', 'freelancer')->paginate(15);
+
         return view('admin.applications.index', compact('applications'));
     }
 
@@ -32,6 +33,7 @@ class ApplicationManagementController extends Controller
     public function show(Application $application)
     {
         $application->load('job', 'freelancer');
+
         return view('admin.applications.show', compact('application'));
     }
 
@@ -41,6 +43,7 @@ class ApplicationManagementController extends Controller
     public function edit(Application $application)
     {
         $application->load('job', 'freelancer');
+
         return view('admin.applications.edit', compact('application'));
     }
 
@@ -50,6 +53,7 @@ class ApplicationManagementController extends Controller
     public function update(UpdateApplicationRequest $request, Application $application)
     {
         $application->update($request->validated());
+
         return redirect()->route('admin.applications.index')->with('success', 'Application updated successfully.');
     }
-} 
+}

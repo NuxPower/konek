@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Category>
@@ -19,7 +19,7 @@ class CategoryFactory extends Factory
     {
         $categories = [
             'Web Development',
-            'Mobile Development', 
+            'Mobile Development',
             'Graphic Design',
             'Content Writing',
             'Digital Marketing',
@@ -37,7 +37,7 @@ class CategoryFactory extends Factory
             'E-commerce',
             'WordPress Development',
             'Logo Design',
-            'Tutoring'
+            'Tutoring',
         ];
 
         $name = fake()->randomElement($categories);
@@ -46,18 +46,18 @@ class CategoryFactory extends Factory
             $baseSlug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $name));
             $baseSlug = trim($baseSlug, '-');
             if (empty($baseSlug)) {
-                $baseSlug = 'category-' . \Illuminate\Support\Str::random(8);
+                $baseSlug = 'category-'.\Illuminate\Support\Str::random(8);
             }
         }
         $slug = $baseSlug;
         $counter = 1;
         // Ensure uniqueness of slug
         while (Category::where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
+            $slug = $baseSlug.'-'.$counter;
             $counter++;
         }
-        if (empty($slug) || !is_string($slug) || $slug === '?' || !preg_match('/^[a-z0-9\-]+$/', $slug)) {
-            $slug = 'category-' . \Illuminate\Support\Str::random(8);
+        if (empty($slug) || ! is_string($slug) || $slug === '?' || ! preg_match('/^[a-z0-9\-]+$/', $slug)) {
+            $slug = 'category-'.\Illuminate\Support\Str::random(8);
         }
 
         return [

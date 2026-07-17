@@ -17,7 +17,7 @@ class SecurityPerformanceTest extends TestCase
     {
         $client = User::factory()->client()->create();
 
-        $this->actingAs($client)->get(route('client.dashboard'))->assertOk();
+        $this->actingAs($client)->get(route('member.dashboard'))->assertOk();
 
         $this->assertSame(0, ActivityLog::count());
     }
@@ -27,14 +27,14 @@ class SecurityPerformanceTest extends TestCase
         $client = User::factory()->client()->create();
 
         $this->actingAs($client)
-            ->patch(route('client.profile.update'), [
+            ->patch(route('member.profile.update'), [
                 'name' => 'Updated Client',
             ])
             ->assertRedirect();
 
         $this->assertDatabaseHas('activity_log', [
             'causer_id' => $client->id,
-            'description' => 'PATCH client/profile',
+            'description' => 'PATCH member/profile',
         ]);
     }
 
@@ -45,8 +45,8 @@ class SecurityPerformanceTest extends TestCase
         $otherFreelancer = User::factory()->freelancer()->create();
 
         $this->actingAs($freelancer)
-            ->post(route('freelancer.profile.resume'), [
-                'resume' => UploadedFile::fake()->create('resume.pdf', 100, 'application/pdf'),
+            ->post(route('member.profile.resume'), [
+                'resume' => UploadedFile::fake()->createWithContent('resume.pdf', '%PDF-1.7 safe resume'),
             ])
             ->assertRedirect();
 
@@ -54,11 +54,11 @@ class SecurityPerformanceTest extends TestCase
         Storage::disk('local')->assertExists($path);
 
         $this->actingAs($freelancer)
-            ->get(route('freelancer.profile.resume.download'))
+            ->get(route('member.profile.resume.download'))
             ->assertOk();
 
         $this->actingAs($otherFreelancer)
-            ->get(route('freelancer.profile.resume.download'))
+            ->get(route('member.profile.resume.download'))
             ->assertNotFound();
     }
 }

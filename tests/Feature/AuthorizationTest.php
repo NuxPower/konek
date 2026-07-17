@@ -13,14 +13,45 @@ class AuthorizationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_role_workspaces_reject_other_roles(): void
+    public function test_admin_workspace_rejects_members(): void
     {
-        $client = User::factory()->client()->create();
-        $freelancer = User::factory()->freelancer()->create();
+        $member = User::factory()->member()->create();
 
-        $this->actingAs($client)->get(route('admin.dashboard'))->assertForbidden();
-        $this->actingAs($freelancer)->get(route('client.dashboard'))->assertForbidden();
-        $this->actingAs($client)->get(route('freelancer.dashboard'))->assertForbidden();
+        $this->actingAs($member)->get(route('admin.dashboard'))->assertForbidden();
+        $this->actingAs($member)->get(route('member.dashboard'))->assertOk();
+    }
+
+    public function test_member_identity_workspace_rejects_admins(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)->get(route('member.identity.edit'))->assertForbidden();
+    }
+
+    public function test_admin_can_create_and_update_an_inactive_user(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)->post(route('admin.users.store'), [
+            'name' => 'Inactive Member',
+            'email' => 'inactive-member@cmu.edu.ph',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'role' => 'member',
+            'is_active' => false,
+        ])->assertRedirect(route('admin.users.index'));
+
+        $member = User::where('email', 'inactive-member@cmu.edu.ph')->firstOrFail();
+        $this->assertFalse($member->is_active);
+
+        $this->actingAs($admin)->put(route('admin.users.update', $member), [
+            'name' => $member->name,
+            'email' => $member->email,
+            'role' => 'member',
+            'is_active' => true,
+        ])->assertRedirect(route('admin.users.index'));
+
+        $this->assertTrue($member->refresh()->is_active);
     }
 
     public function test_client_cannot_access_another_clients_job(): void
@@ -29,9 +60,9 @@ class AuthorizationTest extends TestCase
         $otherClient = User::factory()->client()->create();
         $job = $this->createJob($owner);
 
-        $this->actingAs($otherClient)->get(route('client.jobs.show', $job))->assertForbidden();
-        $this->actingAs($otherClient)->get(route('client.jobs.edit', $job))->assertForbidden();
-        $this->actingAs($otherClient)->patch(route('client.jobs.update', $job), [
+        $this->actingAs($otherClient)->get(route('member.posted-jobs.show', $job))->assertForbidden();
+        $this->actingAs($otherClient)->get(route('member.posted-jobs.edit', $job))->assertForbidden();
+        $this->actingAs($otherClient)->patch(route('member.posted-jobs.update', $job), [
             'title' => 'Unauthorized change',
         ])->assertForbidden();
 
@@ -50,17 +81,17 @@ class AuthorizationTest extends TestCase
         ]);
 
         $this->actingAs($owner)
-            ->patch(route('client.applications.status', $application), ['status' => 'shortlisted'])
+            ->patch(route('member.received-applications.status', $application), ['status' => 'shortlisted'])
             ->assertRedirect();
 
         $this->assertDatabaseHas('applications', ['id' => $application->id, 'status' => 'shortlisted']);
 
         $this->actingAs($otherClient)
-            ->get(route('client.applications.show', $application))
+            ->get(route('member.received-applications.show', $application))
             ->assertForbidden();
 
         $this->actingAs($otherClient)
-            ->patch(route('client.applications.status', $application), ['status' => 'accepted'])
+            ->patch(route('member.received-applications.status', $application), ['status' => 'accepted'])
             ->assertForbidden();
     }
 
@@ -75,11 +106,11 @@ class AuthorizationTest extends TestCase
         ]);
 
         $this->actingAs($otherFreelancer)
-            ->get(route('freelancer.applications.show', $application))
+            ->get(route('member.applications.show', $application))
             ->assertForbidden();
 
         $this->actingAs($otherFreelancer)
-            ->delete(route('freelancer.applications.destroy', $application))
+            ->delete(route('member.applications.destroy', $application))
             ->assertForbidden();
 
         $this->assertDatabaseHas('applications', ['id' => $application->id]);
@@ -98,16 +129,32 @@ class AuthorizationTest extends TestCase
         ]);
 
         $this->actingAs($freelancer)
-            ->get(route('freelancer.jobs.apply.create', $publishedJob))
+            ->get(route('member.jobs.apply.create', $publishedJob))
             ->assertForbidden();
 
         $this->actingAs($freelancer)
-            ->get(route('freelancer.jobs.show', $draftJob))
+            ->get(route('member.jobs.show', $draftJob))
             ->assertNotFound();
 
         $this->actingAs($freelancer)
-            ->post(route('freelancer.jobs.apply', $draftJob), [
+            ->post(route('member.jobs.apply', $draftJob), [
                 'cover_letter' => 'I am interested in this role.',
+            ])
+            ->assertForbidden();
+    }
+
+    public function test_member_cannot_apply_to_own_job(): void
+    {
+        $member = User::factory()->member()->create();
+        $job = $this->createJob($member);
+
+        $this->actingAs($member)
+            ->get(route('member.jobs.apply.create', $job))
+            ->assertForbidden();
+
+        $this->actingAs($member)
+            ->post(route('member.jobs.apply', $job), [
+                'cover_letter' => 'I should not be allowed to apply to work that I posted myself.',
             ])
             ->assertForbidden();
     }

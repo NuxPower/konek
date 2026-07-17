@@ -67,7 +67,7 @@ class JobApplicationController extends Controller
         $data['freelancer_id'] = $request->user()->id;
         $application = $this->applicationService->submitApplication($data);
 
-        return redirect()->route('freelancer.applications.show', $application)->with('success', 'Application submitted successfully.');
+        return redirect()->route('member.applications.show', $application)->with('success', 'Application submitted successfully.');
     }
 
     /**
@@ -88,6 +88,6 @@ class JobApplicationController extends Controller
         $this->authorize('withdraw', $application);
         $this->applicationService->withdraw($application);
 
-        return redirect()->route('freelancer.applications.index')->with('success', 'Application withdrawn.');
+        return redirect()->route('member.applications.index')->with('success', 'Application withdrawn.');
     }
 }

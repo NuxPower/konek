@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -21,14 +22,26 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'username',
         'password',
         'role',
         'phone',
         'bio',
+        'introduction',
         'resume_path',
+        'profile_photo_path',
         'student_id',
         'department',
         'year_level',
+        'availability',
+        'portfolio_url',
+        'linkedin_url',
+        'github_url',
+        'facebook_url',
+        'is_profile_public',
+        'show_email',
+        'show_phone',
+        'show_links',
         'is_active',
         'last_login_at',
     ];
@@ -43,20 +56,69 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
-            'is_active' => 'boolean',
             'year_level' => 'integer',
+            'is_profile_public' => 'boolean',
+            'show_email' => 'boolean',
+            'show_phone' => 'boolean',
+            'show_links' => 'boolean',
+            'is_active' => 'boolean',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (! $user->username) {
+                $user->username = static::generateUniqueUsername($user->name);
+            }
+        });
+    }
+
+    public static function generateUniqueUsername(string $name, ?int $ignoreUserId = null): string
+    {
+        $base = Str::slug($name) ?: 'member';
+        $username = $base;
+        $suffix = 1;
+
+        while (static::query()
+            ->where('username', $username)
+            ->when($ignoreUserId, fn ($query) => $query->whereKeyNot($ignoreUserId))
+            ->exists()) {
+            $username = "{$base}-{$suffix}";
+            $suffix++;
+        }
+
+        return $username;
+    }
+
+    public function canBeViewedBy(?User $viewer): bool
+    {
+        if ($viewer && ($viewer->is($this) || $viewer->role === 'admin')) {
+            return true;
+        }
+
+        return $this->is_profile_public;
+    }
+
+    public function identityVerification(): HasOne
+    {
+        return $this->hasOne(IdentityVerification::class);
+    }
+
+    public function getIdProofPointsAttribute(): int
+    {
+        return $this->identityVerification?->proof_points ?? 0;
+    }
+
+    public function getIdProofStatusAttribute(): string
+    {
+        return $this->identityVerification?->status ?? IdentityVerification::STATUS_UNSUBMITTED;
     }
 
     /**
@@ -64,33 +126,33 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function skills()
     {
-        return $this->belongsToMany(\App\Models\Skill::class, 'user_skill')
+        return $this->belongsToMany(Skill::class, 'user_skill')
             ->withTimestamps()
             ->withPivot(['proficiency_level', 'years_experience']);
     }
 
     /**
-     * The jobs posted by the user (if client).
+     * Jobs posted by the user.
      */
     public function jobs()
     {
-        return $this->hasMany(\App\Models\Job::class, 'client_id');
+        return $this->hasMany(Job::class, 'client_id');
     }
 
     /**
-     * The applications submitted by the user (if freelancer).
+     * Applications submitted by the user.
      */
     public function applications()
     {
-        return $this->hasMany(\App\Models\Application::class, 'freelancer_id');
+        return $this->hasMany(Application::class, 'freelancer_id');
     }
 
     /**
-     * Jobs bookmarked by the freelancer.
+     * Jobs bookmarked by the user.
      */
     public function savedJobs()
     {
-        return $this->belongsToMany(\App\Models\Job::class, 'saved_jobs')
+        return $this->belongsToMany(Job::class, 'saved_jobs')
             ->withTimestamps();
     }
 }

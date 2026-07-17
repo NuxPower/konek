@@ -14,12 +14,12 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['admin', 'client', 'freelancer'])->default('freelancer');
+            $table->enum('role', ['admin', 'member'])->default('member');
             $table->string('phone')->nullable();
             $table->text('bio')->nullable();
             $table->string('student_id')->nullable();
             $table->string('department')->nullable();
-            $table->year('year_level')->nullable();
+            $table->unsignedTinyInteger('year_level')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamp('last_login_at')->nullable();
             $table->rememberToken();
@@ -31,4 +31,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('users');
     }
-}; 
+};

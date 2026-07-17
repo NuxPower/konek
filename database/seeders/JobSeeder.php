@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Job;
-use App\Models\User;
 use App\Models\Category;
+use App\Models\Job;
 use App\Models\Skill;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class JobSeeder extends Seeder
 {
@@ -15,7 +15,7 @@ class JobSeeder extends Seeder
      */
     public function run(): void
     {
-        $clients = User::where('role', 'client')->get();
+        $clients = User::where('role', 'member')->get();
         $categories = Category::where('is_active', true)->get();
         $skills = Skill::where('is_active', true)->get();
 
@@ -31,7 +31,7 @@ class JobSeeder extends Seeder
                 'experience_level' => 'entry',
                 'status' => 'published',
                 'category' => 'E-commerce',
-                'skills' => ['WordPress', 'WooCommerce', 'PHP', 'JavaScript', 'HTML', 'CSS']
+                'skills' => ['WordPress', 'WooCommerce', 'PHP', 'JavaScript', 'HTML', 'CSS'],
             ],
             [
                 'title' => 'Mobile App UI/UX Design',
@@ -43,7 +43,7 @@ class JobSeeder extends Seeder
                 'experience_level' => 'intermediate',
                 'status' => 'published',
                 'category' => 'UI/UX Design',
-                'skills' => ['Figma', 'Adobe XD', 'Sketch', 'UI/UX Design']
+                'skills' => ['Figma', 'Adobe XD', 'Sketch', 'UI/UX Design'],
             ],
             [
                 'title' => 'Content Writing for Tech Blog',
@@ -55,7 +55,7 @@ class JobSeeder extends Seeder
                 'experience_level' => 'entry',
                 'status' => 'published',
                 'category' => 'Content Writing',
-                'skills' => ['Content Writing', 'SEO', 'Technical Writing']
+                'skills' => ['Content Writing', 'SEO', 'Technical Writing'],
             ],
             [
                 'title' => 'Social Media Management',
@@ -67,7 +67,7 @@ class JobSeeder extends Seeder
                 'experience_level' => 'entry',
                 'status' => 'published',
                 'category' => 'Social Media Management',
-                'skills' => ['Social Media Marketing', 'Content Marketing', 'Canva', 'Facebook Ads']
+                'skills' => ['Social Media Marketing', 'Content Marketing', 'Canva', 'Facebook Ads'],
             ],
             [
                 'title' => 'Data Entry and Processing',
@@ -79,7 +79,7 @@ class JobSeeder extends Seeder
                 'experience_level' => 'entry',
                 'status' => 'published',
                 'category' => 'Data Entry',
-                'skills' => ['Data Entry', 'Microsoft Excel', 'Google Sheets']
+                'skills' => ['Data Entry', 'Microsoft Excel', 'Google Sheets'],
             ],
             [
                 'title' => 'Laravel Web Application Development',
@@ -91,7 +91,7 @@ class JobSeeder extends Seeder
                 'experience_level' => 'expert',
                 'status' => 'published',
                 'category' => 'Web Development',
-                'skills' => ['Laravel', 'PHP', 'MySQL', 'JavaScript', 'REST API']
+                'skills' => ['Laravel', 'PHP', 'MySQL', 'JavaScript', 'REST API'],
             ],
             [
                 'title' => 'Logo Design for New Restaurant',
@@ -103,7 +103,7 @@ class JobSeeder extends Seeder
                 'experience_level' => 'intermediate',
                 'status' => 'published',
                 'category' => 'Logo Design',
-                'skills' => ['Adobe Illustrator', 'Logo Design', 'Graphic Design']
+                'skills' => ['Adobe Illustrator', 'Logo Design', 'Graphic Design'],
             ],
             [
                 'title' => 'Video Editing for YouTube Channel',
@@ -115,14 +115,14 @@ class JobSeeder extends Seeder
                 'experience_level' => 'entry',
                 'status' => 'published',
                 'category' => 'Video Editing',
-                'skills' => ['Adobe Premiere Pro', 'After Effects', 'Video Editing']
+                'skills' => ['Adobe Premiere Pro', 'After Effects', 'Video Editing'],
             ],
         ];
 
         foreach ($sampleJobs as $jobData) {
             $category = $categories->where('name', $jobData['category'])->first();
             $client = $clients->random();
-            
+
             $job = Job::create([
                 'title' => $jobData['title'],
                 'description' => $jobData['description'],

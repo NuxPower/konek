@@ -61,7 +61,7 @@ class ReportController extends Controller
         $validated = $request->validate([
             'report' => 'required|in:users,jobs,applications',
             'status' => 'nullable|string|max:30',
-            'role' => 'nullable|in:admin,client,freelancer',
+            'role' => 'nullable|in:admin,member',
             'active' => 'nullable|in:0,1',
             'type' => 'nullable|in:full-time,part-time,contract,internship',
             'from' => 'nullable|date',
@@ -82,7 +82,7 @@ class ReportController extends Controller
         ];
 
         $rules += match ($report) {
-            'users' => ['role' => 'nullable|in:admin,client,freelancer', 'active' => 'nullable|in:0,1'],
+            'users' => ['role' => 'nullable|in:admin,member', 'active' => 'nullable|in:0,1'],
             'jobs' => ['status' => 'nullable|in:draft,published,closed,cancelled', 'type' => 'nullable|in:full-time,part-time,contract,internship'],
             'applications' => ['status' => 'nullable|in:pending,reviewing,shortlisted,accepted,rejected,withdrawn'],
         };

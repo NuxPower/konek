@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use App\Models\User;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -20,11 +20,11 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'email' => strtolower(fake()->unique()->userName()).'@cmu.edu.ph',
             'email_verified_at' => now(),
             'password' => bcrypt('password'), // password
             'remember_token' => Str::random(10),
-            'role' => fake()->randomElement(['admin', 'client', 'freelancer']),
+            'role' => 'member',
             'phone' => fake()->phoneNumber(),
             'bio' => fake()->paragraph(3),
             'is_active' => true,
@@ -49,7 +49,7 @@ class UserFactory extends Factory
     public function cmuEmail(): static
     {
         return $this->state(fn (array $attributes) => [
-            'email' => fake()->unique()->userName() . '@cmu.edu.ph',
+            'email' => fake()->unique()->userName().'@cmu.edu.ph',
         ]);
     }
 
@@ -66,24 +66,32 @@ class UserFactory extends Factory
     }
 
     /**
-     * Create a client user
+     * Create a member user who can post work and find work.
      */
     public function client(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' => 'client',
-            'email' => fake()->unique()->safeEmail(),
+            'role' => 'member',
+            'email' => strtolower(fake()->unique()->userName()).'@cmu.edu.ph',
         ]);
     }
 
     /**
-     * Create a freelancer user
+     * Create a member user who can post work and find work.
      */
     public function freelancer(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' => 'freelancer',
-            'email' => fake()->unique()->safeEmail(),
+            'role' => 'member',
+            'email' => strtolower(fake()->unique()->userName()).'@cmu.edu.ph',
+        ]);
+    }
+
+    public function member(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'member',
+            'email' => strtolower(fake()->unique()->userName()).'@cmu.edu.ph',
         ]);
     }
 }

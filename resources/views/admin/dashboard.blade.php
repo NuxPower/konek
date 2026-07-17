@@ -128,7 +128,7 @@
         <div class="panel-header">
             <div>
                 <h2>User growth</h2>
-                <p class="mt-1 text-sm text-slate-500">{{ $totalClients }} clients and {{ $totalFreelancers }} freelancers registered.</p>
+                <p class="mt-1 text-sm text-slate-500">{{ $totalMembers }} student members · {{ $activePosters }} have posted jobs · {{ $activeApplicants }} have applied.</p>
             </div>
         </div>
         <canvas id="userTrendChart" height="130"></canvas>

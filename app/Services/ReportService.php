@@ -78,7 +78,7 @@ class ReportService
                 ]),
             ],
             'jobs' => [
-                ['Title', 'Client', 'Category', 'Type', 'Status', 'Applications', 'Deadline', 'Created'],
+                ['Title', 'Posted By', 'Category', 'Type', 'Status', 'Applications', 'Deadline', 'Created'],
                 $this->jobQuery($filters)->get()->map(fn (Job $job) => [
                     $job->title,
                     $job->client->name ?? '',
@@ -91,7 +91,7 @@ class ReportService
                 ]),
             ],
             'applications' => [
-                ['Job', 'Client', 'Freelancer', 'Status', 'Proposed Rate', 'Submitted', 'Reviewed'],
+                ['Job', 'Posted By', 'Applicant', 'Status', 'Proposed Rate', 'Submitted', 'Reviewed'],
                 $this->applicationQuery($filters)->get()->map(fn (Application $application) => [
                     $application->job->title ?? '',
                     $application->job->client->name ?? '',

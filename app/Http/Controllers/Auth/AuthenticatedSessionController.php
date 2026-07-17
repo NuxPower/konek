@@ -37,8 +37,7 @@ class AuthenticatedSessionController extends Controller
 
         $dashboard = match ($user->role) {
             'admin' => 'admin.dashboard',
-            'client' => 'client.dashboard',
-            'freelancer' => 'freelancer.dashboard',
+            'member', 'client', 'freelancer' => 'member.dashboard',
             default => 'dashboard',
         };
 

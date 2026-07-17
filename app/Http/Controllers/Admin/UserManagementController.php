@@ -37,7 +37,7 @@ class UserManagementController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => ['required', Rule::in(['admin', 'client', 'freelancer'])],
+            'role' => ['required', Rule::in(['admin', 'member'])],
             'is_active' => 'required|boolean',
         ]);
         $validated['password'] = Hash::make($validated['password']);
@@ -70,7 +70,7 @@ class UserManagementController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'role' => ['required', Rule::in(['admin', 'client', 'freelancer'])],
+            'role' => ['required', Rule::in(['admin', 'member'])],
             'password' => 'nullable|string|min:8|confirmed',
             'is_active' => 'required|boolean',
         ]);

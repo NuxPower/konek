@@ -2,7 +2,7 @@
 @extends('layouts.app')
 @section('content')
 <h1>Search Jobs</h1>
-<form method="GET" action="{{ route('freelancer.jobs.search') }}" style="margin-bottom:1rem;">
+<form method="GET" action="{{ route('member.jobs.search') }}" style="margin-bottom:1rem;">
     <input type="text" name="q" value="{{ request('q') }}" placeholder="Search jobs..." style="width:200px;">
     <button type="submit">Search</button>
 </form>
@@ -20,7 +20,7 @@
             <td>{{ ucfirst($job->status) }}</td>
             <td>{{ $job->client->name ?? '-' }}</td>
             <td>
-                <a href="{{ route('freelancer.jobs.show', $job) }}">Show</a>
+                <a href="{{ route('member.jobs.show', $job) }}">Show</a>
             </td>
         </tr>
         @empty

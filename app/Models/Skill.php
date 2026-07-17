@@ -49,4 +49,4 @@ class Skill extends Model
             ->withTimestamps()
             ->withPivot(['proficiency_level', 'years_experience']);
     }
-} 
+}

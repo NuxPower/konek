@@ -70,7 +70,7 @@ class JobService
                         [
                             'title' => 'Job status updated',
                             'type' => 'job',
-                            'url' => route('freelancer.applications.show', $application),
+                            'url' => route('member.applications.show', $application),
                         ]
                     );
                 });

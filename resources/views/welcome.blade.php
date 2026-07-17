@@ -38,7 +38,7 @@
                     Opportunities within<br class="hidden sm:block"> the CMU community.
                 </h1>
                 <p class="landing-hero-item mx-auto mt-7 max-w-2xl text-base leading-7 text-slate-500 sm:text-lg sm:leading-8" style="--enter-delay: 280ms">
-                    A straightforward place for clients to find capable people and for freelancers to discover meaningful work.
+                    A straightforward place for students to post work, find work, and collaborate across the CMU community.
                 </p>
                 <div class="landing-hero-item mt-9 flex flex-wrap justify-center gap-3" style="--enter-delay: 360ms">
                     <a href="{{ route('register') }}" class="landing-primary-button px-6 py-3">Create an account</a>

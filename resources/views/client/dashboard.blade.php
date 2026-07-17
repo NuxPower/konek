@@ -7,7 +7,7 @@
         <h1>Client dashboard</h1>
         <p class="page-subtitle">Review candidates, watch approaching deadlines, and keep your job posts moving.</p>
     </div>
-    <a href="{{ route('client.jobs.create') }}" class="btn btn-primary">Post a job</a>
+    <a href="{{ route('member.posted-jobs.create') }}" class="btn btn-primary">Post a job</a>
 </div>
 
 <div class="stats-grid">
@@ -24,7 +24,7 @@
                 <h2>Candidates needing review</h2>
                 <p class="mt-1 text-sm text-slate-500">Prioritize new and in-progress applications.</p>
             </div>
-            <a href="{{ route('client.applications.index') }}" class="text-sm font-semibold text-emerald-700">View all</a>
+            <a href="{{ route('member.received-applications.index') }}" class="text-sm font-semibold text-emerald-700">View all</a>
         </div>
         <div class="table-wrap">
             <table class="table">
@@ -32,7 +32,7 @@
                 <tbody>
                     @forelse($reviewQueue as $application)
                         <tr>
-                            <td><a href="{{ route('client.applications.show', $application) }}">{{ $application->freelancer->name ?? 'Unknown talent' }}</a></td>
+                            <td><a href="{{ route('member.received-applications.show', $application) }}">{{ $application->freelancer->name ?? 'Unknown talent' }}</a></td>
                             <td>{{ $application->job->title ?? 'Unavailable job' }}</td>
                             <td><span class="badge badge-application-{{ $application->status }}">{{ ucfirst($application->status) }}</span></td>
                             <td>{{ $application->created_at->diffForHumans() }}</td>
@@ -54,7 +54,7 @@
         </div>
         <div class="space-y-3">
             @forelse($upcomingDeadlines as $job)
-                <a href="{{ route('client.jobs.show', $job) }}" class="block rounded-xl border border-slate-200 p-4 hover:border-emerald-200 hover:bg-emerald-50/40">
+                <a href="{{ route('member.posted-jobs.show', $job) }}" class="block rounded-xl border border-slate-200 p-4 hover:border-emerald-200 hover:bg-emerald-50/40">
                     <div class="flex items-start justify-between gap-3">
                         <p class="font-semibold text-slate-900">{{ $job->title }}</p>
                         <span class="shrink-0 text-sm font-semibold text-emerald-700">{{ $job->deadline->format('M d') }}</span>
@@ -75,11 +75,11 @@
             <h2>Drafts waiting to be published</h2>
             <p class="mt-1 text-sm text-slate-500">Finish these job posts when they are ready for applicants.</p>
         </div>
-        <a href="{{ route('client.jobs.index', ['status' => 'draft']) }}" class="text-sm font-semibold text-emerald-700">View drafts</a>
+        <a href="{{ route('member.posted-jobs.index', ['status' => 'draft']) }}" class="text-sm font-semibold text-emerald-700">View drafts</a>
     </div>
     <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         @foreach($draftsNeedingAction as $job)
-            <a href="{{ route('client.jobs.edit', $job) }}" class="rounded-xl border border-amber-200 bg-white p-4 hover:border-emerald-300">
+            <a href="{{ route('member.posted-jobs.edit', $job) }}" class="rounded-xl border border-amber-200 bg-white p-4 hover:border-emerald-300">
                 <p class="font-semibold text-slate-900">{{ $job->title }}</p>
                 <p class="mt-2 text-xs text-slate-400">Updated {{ $job->updated_at->diffForHumans() }}</p>
             </a>
@@ -94,7 +94,7 @@
             <h2>Recent jobs</h2>
             <p class="mt-1 text-sm text-slate-500">{{ $totalJobs }} jobs have received {{ $totalApplications }} total applications.</p>
         </div>
-        <a href="{{ route('client.jobs.index') }}" class="text-sm font-semibold text-emerald-700">Manage jobs</a>
+        <a href="{{ route('member.posted-jobs.index') }}" class="text-sm font-semibold text-emerald-700">Manage jobs</a>
     </div>
     <div class="table-wrap">
         <table class="table">
@@ -102,7 +102,7 @@
             <tbody>
                 @forelse($recentJobs as $job)
                     <tr>
-                        <td><a href="{{ route('client.jobs.show', $job) }}">{{ $job->title }}</a></td>
+                        <td><a href="{{ route('member.posted-jobs.show', $job) }}">{{ $job->title }}</a></td>
                         <td><span class="badge {{ $job->status === 'published' ? 'badge-success' : 'badge-muted' }}">{{ ucfirst($job->status) }}</span></td>
                         <td>{{ $job->applications_count }}</td>
                         <td>{{ $job->updated_at->diffForHumans() }}</td>

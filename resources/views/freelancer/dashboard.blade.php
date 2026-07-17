@@ -7,7 +7,7 @@
         <h1>Talent dashboard</h1>
         <p class="page-subtitle">Track application progress and focus on jobs worth applying to next.</p>
     </div>
-    <a href="{{ route('freelancer.jobs.index') }}" class="btn btn-primary">Browse all jobs</a>
+    <a href="{{ route('member.jobs.index') }}" class="btn btn-primary">Browse all jobs</a>
 </div>
 
 <div class="stats-grid">
@@ -27,7 +27,7 @@
     </div>
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         @foreach($closingSoonJobs as $job)
-            <a href="{{ route('freelancer.jobs.show', $job) }}" class="rounded-xl border border-amber-200 bg-white p-4 hover:border-emerald-300">
+            <a href="{{ route('member.jobs.show', $job) }}" class="rounded-xl border border-amber-200 bg-white p-4 hover:border-emerald-300">
                 <p class="font-semibold text-slate-900">{{ $job->title }}</p>
                 <p class="mt-1 text-sm text-slate-500">{{ $job->client->name ?? 'CMU Client' }}</p>
                 <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-amber-700">Due {{ $job->deadline->format('M d') }}</p>
@@ -43,7 +43,7 @@
             <h2>Recommended opportunities</h2>
             <p class="mt-1 text-sm text-slate-500">Open jobs you have not applied to, prioritized by your profile skills.</p>
         </div>
-        <a href="{{ route('freelancer.jobs.index') }}" class="text-sm font-semibold text-emerald-700">Browse more</a>
+        <a href="{{ route('member.jobs.index') }}" class="text-sm font-semibold text-emerald-700">Browse more</a>
     </div>
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         @forelse($recommendedJobs as $job)
@@ -54,7 +54,7 @@
                         <span class="badge badge-success">{{ $job->matching_skills_count }} skill match</span>
                     @endif
                 </div>
-                <h3 class="mt-3 text-lg"><a href="{{ route('freelancer.jobs.show', $job) }}" class="hover:text-emerald-800">{{ $job->title }}</a></h3>
+                <h3 class="mt-3 text-lg"><a href="{{ route('member.jobs.show', $job) }}" class="hover:text-emerald-800">{{ $job->title }}</a></h3>
                 <p class="mt-1 text-sm text-slate-500">{{ $job->client->name ?? 'CMU Client' }}</p>
                 <p class="mt-4 text-sm leading-6 text-slate-600">{{ Str::limit($job->description, 110) }}</p>
                 <div class="mt-4 flex flex-wrap gap-2">
@@ -64,7 +64,7 @@
                 </div>
                 <div class="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
                     <span class="text-xs text-slate-400">{{ $job->deadline ? 'Due '.$job->deadline->format('M d') : 'Open deadline' }}</span>
-                    <a href="{{ route('freelancer.jobs.show', $job) }}" class="text-sm font-semibold text-emerald-700">View job</a>
+                    <a href="{{ route('member.jobs.show', $job) }}" class="text-sm font-semibold text-emerald-700">View job</a>
                 </div>
             </article>
         @empty
@@ -79,7 +79,7 @@
             <h2>Application progress</h2>
             <p class="mt-1 text-sm text-slate-500">{{ $totalApplications }} applications submitted to date.</p>
         </div>
-        <a href="{{ route('freelancer.applications.index') }}" class="text-sm font-semibold text-emerald-700">View all</a>
+        <a href="{{ route('member.applications.index') }}" class="text-sm font-semibold text-emerald-700">View all</a>
     </div>
     <div class="table-wrap">
         <table class="table">
@@ -87,7 +87,7 @@
             <tbody>
                 @forelse($recentApplications as $application)
                     <tr>
-                        <td><a href="{{ route('freelancer.applications.show', $application) }}">{{ $application->job->title ?? 'Unavailable job' }}</a></td>
+                        <td><a href="{{ route('member.applications.show', $application) }}">{{ $application->job->title ?? 'Unavailable job' }}</a></td>
                         <td>{{ $application->job->client->name ?? '—' }}</td>
                         <td><span class="badge badge-application-{{ $application->status }}">{{ ucfirst($application->status) }}</span></td>
                         <td>{{ $application->updated_at->diffForHumans() }}</td>

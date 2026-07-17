@@ -3,42 +3,38 @@
     $unreadNotificationCount = auth()->user()->unreadNotifications()->count();
     $mobileNavigation = match ($role) {
         'admin' => [
-            ['label' => 'Home', 'route' => 'admin.dashboard', 'pattern' => 'admin/dashboard'],
-            ['label' => 'Users', 'route' => 'admin.users.index', 'pattern' => 'admin/users*'],
-            ['label' => 'Jobs', 'route' => 'admin.jobs.index', 'pattern' => 'admin/jobs*'],
-            ['label' => 'Apps', 'route' => 'admin.applications.index', 'pattern' => 'admin/applications*'],
-        ],
-        'client' => [
-            ['label' => 'Home', 'route' => 'client.dashboard', 'pattern' => 'client/dashboard'],
-            ['label' => 'Jobs', 'route' => 'client.jobs.index', 'pattern' => 'client/jobs*'],
-            ['label' => 'Applicants', 'route' => 'client.applications.index', 'pattern' => 'client/applications*'],
-            ['label' => 'Profile', 'route' => 'client.profile.show', 'pattern' => 'client/profile*'],
+            ['label' => 'Home', 'route' => 'admin.dashboard', 'pattern' => 'admin/dashboard', 'icon' => 'dashboard'],
+            ['label' => 'Users', 'route' => 'admin.users.index', 'pattern' => 'admin/users*', 'icon' => 'users'],
+            ['label' => 'ID Proof', 'route' => 'admin.identity.index', 'pattern' => 'admin/identity-verifications*', 'icon' => 'profile'],
+            ['label' => 'Jobs', 'route' => 'admin.jobs.index', 'pattern' => 'admin/jobs*', 'icon' => 'jobs'],
+            ['label' => 'Apps', 'route' => 'admin.applications.index', 'pattern' => 'admin/applications*', 'icon' => 'applications'],
         ],
         default => [
-            ['label' => 'Home', 'route' => 'freelancer.dashboard', 'pattern' => 'freelancer/dashboard'],
-            ['label' => 'Jobs', 'route' => 'freelancer.jobs.index', 'pattern' => 'freelancer/jobs*'],
-            ['label' => 'Saved', 'route' => 'freelancer.saved-jobs.index', 'pattern' => 'freelancer/saved-jobs*'],
-            ['label' => 'Applied', 'route' => 'freelancer.applications.index', 'pattern' => 'freelancer/applications*'],
+            ['label' => 'Home', 'route' => 'member.dashboard', 'pattern' => 'member/dashboard', 'icon' => 'dashboard'],
+            ['label' => 'Jobs', 'route' => 'member.jobs.index', 'pattern' => 'member/jobs*', 'icon' => 'jobs'],
+            ['label' => 'Posted', 'route' => 'member.posted-jobs.index', 'pattern' => 'member/posted-jobs*', 'icon' => 'posted'],
+            ['label' => 'Applied', 'route' => 'member.applications.index', 'pattern' => 'member/applications*', 'icon' => 'applications'],
         ],
     };
+    $hideMobileBottomNavigation = request()->routeIs('notifications.*', 'profile.*', 'member.profile.*', 'member.identity.*', 'members.profile.*');
 @endphp
 
-<nav x-data="{ open: false }" @keydown.escape.window="open = false" class="sticky top-0 z-40 border-b border-emerald-950/5 bg-white/95 backdrop-blur">
+<div x-data="{ open: false }" @keydown.escape.window="open = false">
+<nav class="sticky top-0 z-40 border-b border-emerald-950/5 bg-white/95 backdrop-blur">
     <div class="mx-auto max-w-[1440px] px-4 sm:px-7">
         <div class="flex h-[72px] items-center justify-between">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
                 <x-application-logo class="h-9 w-9 text-emerald-700" />
                 <div>
                     <div class="text-sm font-bold tracking-[0.14em] text-emerald-950">KONEK</div>
-                    <div class="text-[10px] font-medium text-slate-400">{{ ucfirst($role) }} workspace</div>
+                    <div class="text-[10px] font-medium text-slate-400">{{ $role === 'admin' ? 'Admin' : 'Student' }} workspace</div>
                 </div>
             </a>
 
             <div class="hidden items-center gap-4 sm:flex">
-                @if($role === 'client')
-                    <a href="{{ route('client.jobs.create') }}" class="btn btn-primary !px-3.5 !py-2">Post a job</a>
-                @elseif($role === 'freelancer')
-                    <a href="{{ route('freelancer.jobs.index') }}" class="btn btn-primary !px-3.5 !py-2">Find work</a>
+                @if($role === 'member')
+                    <a href="{{ route('member.posted-jobs.create') }}" class="btn btn-secondary !px-3.5 !py-2">Post a job</a>
+                    <a href="{{ route('member.jobs.index') }}" class="btn btn-primary !px-3.5 !py-2">Find work</a>
                 @endif
 
                 <a href="{{ route('notifications.index') }}" class="relative grid h-10 w-10 place-items-center rounded-xl text-slate-500 transition hover:bg-emerald-50 hover:text-emerald-800" aria-label="Notifications">
@@ -86,39 +82,43 @@
         </div>
     </div>
 
-    <div x-show="open" x-cloak class="fixed inset-0 z-50 sm:hidden">
-        <button @click="open = false" class="absolute inset-0 bg-slate-950/35 backdrop-blur-sm" aria-label="Close navigation menu"></button>
-        <div x-show="open"
-             x-transition:enter="transition duration-200 ease-out"
-             x-transition:enter-start="-translate-x-full"
-             x-transition:enter-end="translate-x-0"
-             x-transition:leave="transition duration-150 ease-in"
-             x-transition:leave-start="translate-x-0"
-             x-transition:leave-end="-translate-x-full"
-             class="absolute inset-y-0 left-0 flex w-[min(86vw,340px)] flex-col bg-[#fbfdfb] p-5 shadow-2xl">
-            <div class="mb-6 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <x-application-logo class="h-9 w-9 text-emerald-700" />
-                    <span class="text-sm font-bold tracking-[0.14em] text-emerald-950">KONEK</span>
-                </div>
-                <button @click="open = false" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close menu">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div class="mobile-sidebar flex-1 overflow-y-auto">@include('layouts.sidebar')</div>
-            <form method="POST" action="{{ route('logout') }}" class="mt-4">
-                @csrf
-                <button class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-semibold text-slate-600">Log out</button>
-            </form>
-        </div>
-    </div>
 </nav>
 
-<nav class="mobile-bottom-nav sm:hidden" aria-label="Primary mobile navigation">
-    @foreach($mobileNavigation as $item)
-        <a href="{{ route($item['route']) }}" class="{{ request()->is($item['pattern']) ? 'active' : '' }}">
-            <span class="mobile-nav-dot"></span>
-            <span>{{ $item['label'] }}</span>
-        </a>
-    @endforeach
-</nav>
+<div x-show="open" x-cloak class="fixed inset-0 z-50 sm:hidden">
+    <button @click="open = false" class="absolute inset-0 bg-slate-950/35 backdrop-blur-sm" aria-label="Close navigation menu"></button>
+    <div x-show="open"
+         x-transition:enter="transition duration-200 ease-out"
+         x-transition:enter-start="-translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition duration-150 ease-in"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="-translate-x-full"
+         class="absolute inset-y-0 left-0 flex w-[min(88vw,360px)] flex-col overflow-hidden bg-[#fbfdfb] shadow-2xl">
+        <div class="flex h-[76px] shrink-0 items-center justify-between border-b border-emerald-950/5 px-5">
+            <div class="flex items-center gap-3">
+                <x-application-logo class="h-9 w-9 text-emerald-700" />
+                <span class="text-sm font-bold tracking-[0.14em] text-emerald-950">KONEK</span>
+            </div>
+            <button @click="open = false" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close menu">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="mobile-sidebar min-h-0 flex-1 overflow-y-auto px-5 py-5">@include('layouts.sidebar')</div>
+        <form method="POST" action="{{ route('logout') }}" class="shrink-0 border-t border-slate-200/80 p-5">
+            @csrf
+            <button class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-semibold text-slate-600">Log out</button>
+        </form>
+    </div>
+</div>
+</div>
+
+@unless($hideMobileBottomNavigation)
+    <nav class="mobile-bottom-nav sm:hidden" style="--mobile-nav-count: {{ count($mobileNavigation) }};" aria-label="Primary mobile navigation">
+        @foreach($mobileNavigation as $item)
+            <a href="{{ route($item['route']) }}" class="{{ request()->is($item['pattern']) ? 'active' : '' }}">
+                <x-nav-icon :name="$item['icon'] ?? 'circle'" class="mobile-nav-icon" />
+                <span>{{ $item['label'] }}</span>
+            </a>
+        @endforeach
+    </nav>
+@endunless

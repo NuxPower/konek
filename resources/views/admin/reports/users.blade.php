@@ -11,7 +11,7 @@
     </form>
 </div>
 <form method="GET" class="job-filter-panel">
-    <select name="role"><option value="">All roles</option>@foreach(['admin','client','freelancer'] as $role)<option value="{{ $role }}" @selected(request('role') === $role)>{{ ucfirst($role) }}</option>@endforeach</select>
+    <select name="role"><option value="">All roles</option>@foreach(['admin','member'] as $role)<option value="{{ $role }}" @selected(request('role') === $role)>{{ ucfirst($role) }}</option>@endforeach</select>
     <select name="active"><option value="">Any status</option><option value="1" @selected(request('active') === '1')>Active</option><option value="0" @selected(request('active') === '0')>Inactive</option></select>
     <input type="date" name="from" value="{{ request('from') }}" aria-label="From date">
     <input type="date" name="to" value="{{ request('to') }}" aria-label="To date">

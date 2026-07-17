@@ -5,16 +5,16 @@
     <div>
         <p class="page-eyebrow">Opportunity board</p>
         <h1>Find your next project</h1>
-        <p class="page-subtitle">Explore work posted by clients across the CMU community.</p>
+        <p class="page-subtitle">Explore work posted by members across the CMU community.</p>
     </div>
 </div>
 
-<form method="GET" action="{{ route('freelancer.jobs.index') }}" class="job-filter-panel">
+<form method="GET" action="{{ route('member.jobs.index') }}" class="job-filter-panel">
     <div class="job-search-field">
         <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
         </svg>
-        <input type="search" name="q" value="{{ request('q') }}" placeholder="Search title, skill, or client">
+        <input type="search" name="q" value="{{ request('q') }}" placeholder="Search title, skill, or poster">
     </div>
 
     <select name="category" aria-label="Category">
@@ -54,7 +54,7 @@
         {{ Str::plural('opportunity', $jobs->total()) }} available
     </p>
     @if(request()->hasAny(['q', 'category', 'type', 'experience', 'sort']))
-        <a href="{{ route('freelancer.jobs.index') }}" class="text-sm font-semibold text-emerald-700 hover:text-emerald-900">Clear filters</a>
+        <a href="{{ route('member.jobs.index') }}" class="text-sm font-semibold text-emerald-700 hover:text-emerald-900">Clear filters</a>
     @endif
 </div>
 
@@ -72,7 +72,7 @@
             <div class="mt-5">
                 <p class="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">{{ $job->category->name ?? 'General' }}</p>
                 <h2 class="mt-2 text-xl leading-7">
-                    <a href="{{ route('freelancer.jobs.show', $job) }}" class="hover:text-emerald-800">{{ $job->title }}</a>
+                    <a href="{{ route('member.jobs.show', $job) }}" class="hover:text-emerald-800">{{ $job->title }}</a>
                 </h2>
                 <p class="mt-1 text-sm text-slate-500">{{ $job->client->name ?? 'CMU Client' }}</p>
             </div>
@@ -110,7 +110,7 @@
                         @endif
                     </p>
                 </div>
-                <a href="{{ route('freelancer.jobs.show', $job) }}" class="btn btn-secondary">View job</a>
+                <a href="{{ route('member.jobs.show', $job) }}" class="btn btn-secondary">View job</a>
             </div>
         </article>
     @empty
@@ -120,7 +120,7 @@
             </div>
             <h2 class="mt-4">No matching jobs</h2>
             <p class="mt-2 text-sm text-slate-500">Try removing a filter or searching for a broader skill.</p>
-            <a href="{{ route('freelancer.jobs.index') }}" class="btn btn-secondary mt-5">Reset search</a>
+            <a href="{{ route('member.jobs.index') }}" class="btn btn-secondary mt-5">Reset search</a>
         </div>
     @endforelse
 </div>

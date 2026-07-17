@@ -4,26 +4,26 @@
         ->all();
 @endphp
 
-<div>
+<div class="job-form-full">
     <label for="title">Job title</label>
     <input id="title" type="text" name="title" value="{{ old('title', $job->title ?? '') }}" placeholder="e.g. Laravel developer for inventory platform" required>
     <x-input-error :messages="$errors->get('title')" class="mt-2" />
 </div>
 
-<div>
+<div class="job-form-full">
     <label for="description">Job description</label>
     <textarea id="description" name="description" rows="7" placeholder="Explain the project, responsibilities, expected output, and working arrangement." required>{{ old('description', $job->description ?? '') }}</textarea>
     <p class="mt-2 text-xs text-slate-400">Give candidates enough context to understand the work before applying.</p>
     <x-input-error :messages="$errors->get('description')" class="mt-2" />
 </div>
 
-<div>
+<div class="job-form-full">
     <label for="requirements">Requirements</label>
     <textarea id="requirements" name="requirements" rows="6" placeholder="List required experience, tools, availability, or deliverables." required>{{ old('requirements', $job->requirements ?? '') }}</textarea>
     <x-input-error :messages="$errors->get('requirements')" class="mt-2" />
 </div>
 
-<div class="grid gap-5 sm:grid-cols-2">
+<div class="job-form-grid">
     <div>
         <label for="category_id">Category</label>
         <select id="category_id" name="category_id" required>
@@ -44,7 +44,7 @@
     </div>
 </div>
 
-<div class="grid gap-5 sm:grid-cols-2">
+<div class="job-form-grid">
     <div>
         <label for="experience_level">Experience level</label>
         <select id="experience_level" name="experience_level" required>
@@ -63,7 +63,7 @@
     </div>
 </div>
 
-<div class="grid gap-5 sm:grid-cols-2">
+<div class="job-form-grid">
     <div>
         <label for="budget_min">Minimum budget</label>
         <input id="budget_min" type="number" min="0" step="0.01" name="budget_min" value="{{ old('budget_min', $job->budget_min ?? '') }}" placeholder="0.00">
@@ -75,7 +75,7 @@
     </div>
 </div>
 
-<div class="grid gap-5 sm:grid-cols-2">
+<div class="job-form-grid">
     <div>
         <label for="deadline">Application deadline</label>
         <input id="deadline" type="date" name="deadline" value="{{ old('deadline', isset($job) && $job->deadline ? $job->deadline->format('Y-m-d') : '') }}">
@@ -87,7 +87,7 @@
     </div>
 </div>
 
-<div>
+<div class="job-form-full" x-data="{ skillSearch: '' }">
     <div class="mb-3 flex items-end justify-between">
         <div>
             <label class="mb-0">Required skills</label>
@@ -95,9 +95,13 @@
         </div>
         <span class="text-xs text-slate-400">{{ count($selectedSkills) }} selected</span>
     </div>
+    <div class="mb-3">
+        <label for="skill_search" class="sr-only">Search required skills</label>
+        <input id="skill_search" type="search" x-model.debounce.150ms="skillSearch" placeholder="Search skills..." autocomplete="off">
+    </div>
     <div class="skill-picker">
         @foreach($skills as $skill)
-            <label class="skill-option">
+            <label class="skill-option" data-skill-name="{{ strtolower($skill->name) }}" x-show="$el.dataset.skillName.includes(skillSearch.toLowerCase())">
                 <input type="checkbox" name="skills[]" value="{{ $skill->id }}" @checked(in_array($skill->id, $selectedSkills, true))>
                 <span>{{ $skill->name }}</span>
             </label>

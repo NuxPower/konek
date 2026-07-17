@@ -51,7 +51,7 @@ class ApplicationService
                 [
                     'title' => 'New application received',
                     'type' => 'application',
-                    'url' => route('client.applications.show', $application),
+                    'url' => route('member.received-applications.show', $application),
                 ]
             );
 
@@ -101,7 +101,7 @@ class ApplicationService
             [
                 'title' => $status === 'accepted' ? 'Application accepted' : 'Application status updated',
                 'type' => 'application',
-                'url' => route('freelancer.applications.show', $application),
+                'url' => route('member.applications.show', $application),
             ]
         );
 
@@ -134,7 +134,7 @@ class ApplicationService
                 [
                     'title' => 'Application withdrawn',
                     'type' => 'application',
-                    'url' => route('client.applications.show', $application),
+                    'url' => route('member.received-applications.show', $application),
                 ]
             );
 

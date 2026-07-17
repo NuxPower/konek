@@ -65,21 +65,21 @@ class ReportTest extends TestCase
             'name' => 'Active CSV Client',
             'is_active' => true,
         ]);
-        User::factory()->freelancer()->create([
-            'name' => 'Excluded CSV Freelancer',
-            'is_active' => true,
+        User::factory()->member()->create([
+            'name' => 'Excluded CSV Member',
+            'is_active' => false,
         ]);
 
         $response = $this->actingAs($admin)->post(route('admin.reports.export'), [
             'report' => 'users',
-            'role' => 'client',
+            'role' => 'member',
             'active' => '1',
         ]);
 
         $response->assertOk();
         $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
         $this->assertStringContainsString($activeClient->name, $response->streamedContent());
-        $this->assertStringNotContainsString('Excluded CSV Freelancer', $response->streamedContent());
+        $this->assertStringNotContainsString('Excluded CSV Member', $response->streamedContent());
     }
 
     public function test_non_admin_cannot_access_or_export_reports(): void

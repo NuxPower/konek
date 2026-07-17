@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<a href="{{ route('client.applications.index') }}" class="mb-6 inline-flex text-sm font-semibold text-slate-500 hover:text-emerald-800">← Back to applications</a>
+<a href="{{ route('member.received-applications.index') }}" class="mb-6 inline-flex text-sm font-semibold text-slate-500 hover:text-emerald-800">← Back to applications</a>
 <div class="page-header">
     <div>
         <p class="page-eyebrow">Candidate application</p>
@@ -21,7 +21,7 @@
             <div class="mt-3 whitespace-pre-line text-sm text-emerald-700">{{ $application->portfolio_links }}</div>
         @endif
         <div class="my-7 border-t border-slate-100"></div>
-        <form method="POST" action="{{ route('client.applications.notes', $application) }}" class="!m-0 !max-w-none !border-0 !bg-transparent !p-0 !shadow-none">
+        <form method="POST" action="{{ route('member.received-applications.notes', $application) }}" class="!m-0 !max-w-none !border-0 !bg-transparent !p-0 !shadow-none">
             @csrf
             @method('PATCH')
             <label for="client_notes">Private review notes</label>
@@ -52,7 +52,7 @@
                         'rejected' => 'Reject application',
                     ] as $status => $label)
                         @if($status !== $application->status)
-                        <form method="POST" action="{{ route('client.applications.status', $application) }}" class="!m-0 !border-0 !bg-transparent !p-0 !shadow-none">
+                        <form method="POST" action="{{ route('member.received-applications.status', $application) }}" class="!m-0 !border-0 !bg-transparent !p-0 !shadow-none">
                             @csrf
                             @method('PATCH')
                             <input type="hidden" name="status" value="{{ $status }}">

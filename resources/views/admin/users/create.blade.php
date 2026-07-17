@@ -7,7 +7,7 @@
     <div><label for="name">Full name</label><input id="name" type="text" name="name" value="{{ old('name') }}" required><x-input-error :messages="$errors->get('name')" class="mt-2" /></div>
     <div><label for="email">Email</label><input id="email" type="email" name="email" value="{{ old('email') }}" required><x-input-error :messages="$errors->get('email')" class="mt-2" /></div>
     <div class="grid gap-5 sm:grid-cols-2">
-        <div><label for="role">Role</label><select id="role" name="role">@foreach(['admin','client','freelancer'] as $role)<option value="{{ $role }}" @selected(old('role') === $role)>{{ ucfirst($role) }}</option>@endforeach</select></div>
+        <div><label for="role">Role</label><select id="role" name="role">@foreach(['admin','member'] as $role)<option value="{{ $role }}" @selected(old('role', 'member') === $role)>{{ ucfirst($role) }}</option>@endforeach</select></div>
         <div><label for="is_active">Status</label><select id="is_active" name="is_active"><option value="1" @selected(old('is_active', '1') === '1')>Active</option><option value="0" @selected(old('is_active') === '0')>Inactive</option></select></div>
     </div>
     <div class="grid gap-5 sm:grid-cols-2">

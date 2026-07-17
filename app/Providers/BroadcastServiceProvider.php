@@ -13,4 +13,4 @@ class BroadcastServiceProvider extends ServiceProvider
     {
         // Register broadcast channels here
     }
-} 
+}

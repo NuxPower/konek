@@ -67,4 +67,4 @@ class Kernel extends HttpKernel
         'cmu_email' => \App\Http\Middleware\ValidateCMUEmail::class,
         // Add other custom middleware here
     ];
-} 
+}

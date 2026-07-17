@@ -8,7 +8,7 @@ class StoreJobRequest extends FormRequest
 {
     public function authorize()
     {
-        return $this->user()?->role === 'client';
+        return $this->user()?->role === 'member';
     }
 
     public function rules()

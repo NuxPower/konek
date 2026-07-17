@@ -44,7 +44,7 @@ class JobManagementController extends Controller
     public function edit(Job $job)
     {
         $job->load('category', 'client', 'skills');
-        $clients = User::where('role', 'client')->where('is_active', true)->orderBy('name')->get();
+        $clients = User::where('role', 'member')->where('is_active', true)->orderBy('name')->get();
         $categories = Category::where('is_active', true)->orderBy('name')->get();
 
         return view('admin.jobs.edit', compact('job', 'clients', 'categories'));

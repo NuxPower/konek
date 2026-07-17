@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\ActivityLog;
+use App\Models\User;
 
 class ActivityLogService
 {
@@ -20,4 +20,4 @@ class ActivityLogService
             'properties' => $properties,
         ]);
     }
-} 
+}

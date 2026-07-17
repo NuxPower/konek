@@ -26,13 +26,8 @@
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <div>
-            <x-input-label for="role" value="I want to" />
-            <select id="role" name="role" class="mt-2" required>
-                <option value="freelancer" @selected(old('role', 'freelancer') === 'freelancer')>Find work as talent</option>
-                <option value="client" @selected(old('role') === 'client')>Post jobs as a client</option>
-            </select>
-            <x-input-error :messages="$errors->get('role')" class="mt-2" />
+        <div class="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm leading-6 text-emerald-950">
+            Create one student account. You can post work, find work, save jobs, and manage applications from the same workspace.
         </div>
 
         <div>

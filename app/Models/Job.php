@@ -66,15 +66,20 @@ class Job extends Model
     }
 
     /**
-     * Get the client (user) that owns the job.
+     * Get the user that posted the job.
      */
     public function client()
     {
         return $this->belongsTo(\App\Models\User::class, 'client_id');
     }
 
+    public function poster()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'client_id');
+    }
+
     /**
-     * Freelancers who bookmarked this job.
+     * Users who bookmarked this job.
      */
     public function savedByUsers()
     {

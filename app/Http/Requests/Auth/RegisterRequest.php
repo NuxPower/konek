@@ -17,7 +17,7 @@ class RegisterRequest extends FormRequest
             'name' => 'required|string|max:255',
             'email' => 'required|email|ends_with:cmu.edu.ph|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:admin,client,freelancer',
+            'role' => 'nullable|in:member',
         ];
     }
-} 
+}

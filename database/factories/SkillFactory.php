@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Skill;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Skill>
@@ -32,7 +32,7 @@ class SkillFactory extends Factory
             'Accounting', 'Bookkeeping', 'QuickBooks', 'Xero',
             'Customer Service', 'Virtual Assistant', 'Email Marketing',
             'Project Management', 'Agile', 'Scrum', 'Trello', 'Asana',
-            'Mobile Development', 'Android', 'iOS', 'Flutter', 'React Native'
+            'Mobile Development', 'Android', 'iOS', 'Flutter', 'React Native',
         ];
 
         $name = fake()->unique()->randomElement($skills);
@@ -41,13 +41,13 @@ class SkillFactory extends Factory
             $baseSlug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $name));
             $baseSlug = trim($baseSlug, '-');
             if (empty($baseSlug)) {
-                $baseSlug = 'skill-' . \Illuminate\Support\Str::random(8);
+                $baseSlug = 'skill-'.\Illuminate\Support\Str::random(8);
             }
         }
         $slug = $baseSlug;
         // No DB check here, but ensures a valid slug
-        if (empty($slug) || !is_string($slug) || $slug === '?' || !preg_match('/^[a-z0-9\-]+$/', $slug)) {
-            $slug = 'skill-' . \Illuminate\Support\Str::random(8);
+        if (empty($slug) || ! is_string($slug) || $slug === '?' || ! preg_match('/^[a-z0-9\-]+$/', $slug)) {
+            $slug = 'skill-'.\Illuminate\Support\Str::random(8);
         }
 
         return [

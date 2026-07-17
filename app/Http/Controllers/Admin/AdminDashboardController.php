@@ -18,8 +18,9 @@ class AdminDashboardController extends Controller
     {
         $totalUsers = User::count();
         $activeUsers = User::where('is_active', true)->count();
-        $totalClients = User::where('role', 'client')->count();
-        $totalFreelancers = User::where('role', 'freelancer')->count();
+        $totalMembers = User::where('role', 'member')->count();
+        $activePosters = User::whereHas('jobs')->count();
+        $activeApplicants = User::whereHas('applications')->count();
         $totalJobs = Job::count();
         $publishedJobs = Job::where('status', 'published')->count();
         $totalApplications = Application::count();
@@ -67,7 +68,7 @@ class AdminDashboardController extends Controller
         $jobTrendData = $periods->map(fn ($period) => Job::whereBetween('created_at', [$period['start'], $period['end']])->count());
 
         return view('admin.dashboard', compact(
-            'totalUsers', 'activeUsers', 'totalClients', 'totalFreelancers',
+            'totalUsers', 'activeUsers', 'totalMembers', 'activePosters', 'activeApplicants',
             'totalJobs', 'publishedJobs', 'totalApplications', 'applicationsNeedingReview',
             'acceptedApplications', 'acceptanceRate', 'reviewQueue', 'upcomingDeadlines',
             'jobStatusCounts', 'applicationStatusCounts', 'recentActivities',

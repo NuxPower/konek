@@ -21,7 +21,7 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
-        $user = User::factory()->create(['role' => 'freelancer']);
+        $user = User::factory()->member()->create();
 
         $response = $this->post('/login', [
             'email' => $user->email,
@@ -29,7 +29,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('freelancer.dashboard'));
+        $response->assertRedirect(route('member.dashboard'));
         $this->assertNotNull($user->fresh()->last_login_at);
     }
 
@@ -41,6 +41,16 @@ class AuthenticationTest extends TestCase
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
+
+        $this->assertGuest();
+    }
+
+    public function test_users_can_not_authenticate_with_non_cmu_email(): void
+    {
+        $this->post('/login', [
+            'email' => 'outside@example.com',
+            'password' => 'password',
+        ])->assertSessionHasErrors(['email']);
 
         $this->assertGuest();
     }
@@ -59,8 +69,7 @@ class AuthenticationTest extends TestCase
     {
         foreach ([
             'admin' => 'admin.dashboard',
-            'client' => 'client.dashboard',
-            'freelancer' => 'freelancer.dashboard',
+            'member' => 'member.dashboard',
         ] as $role => $route) {
             $user = User::factory()->create([
                 'role' => $role,
@@ -83,8 +92,8 @@ class AuthenticationTest extends TestCase
     public function test_login_discards_a_stale_intended_url_from_another_role(): void
     {
         $client = User::factory()->create([
-            'role' => 'client',
-            'email' => 'client@cmu.edu.ph',
+            'role' => 'member',
+            'email' => 'member@cmu.edu.ph',
         ]);
 
         $response = $this
@@ -94,7 +103,7 @@ class AuthenticationTest extends TestCase
                 'password' => 'password',
             ]);
 
-        $response->assertRedirect(route('client.dashboard'));
+        $response->assertRedirect(route('member.dashboard'));
         $this->assertAuthenticatedAs($client);
         $this->assertNull(session('url.intended'));
     }

@@ -22,7 +22,7 @@ class JobBrowseController extends Controller
      */
     public function show(Request $request, Job $job)
     {
-        abort_unless($job->status === 'published', 404);
+        abort_unless($job->status === 'published' && $job->client_id !== $request->user()->id, 404);
 
         $job->load('category', 'client', 'skills');
         $job->loadExists([
@@ -94,6 +94,7 @@ class JobBrowseController extends Controller
     {
         $query = Job::query()
             ->where('status', 'published')
+            ->where('client_id', '!=', $request->user()->id)
             ->with(['category', 'client', 'skills'])
             ->withExists([
                 'savedByUsers as is_saved' => fn ($builder) => $builder->where('users.id', $request->user()->id),

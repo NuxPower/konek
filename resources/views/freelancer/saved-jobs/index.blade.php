@@ -7,7 +7,7 @@
         <h1>Saved jobs</h1>
         <p class="page-subtitle">Keep promising opportunities here while you compare requirements and prepare applications.</p>
     </div>
-    <a href="{{ route('freelancer.jobs.index') }}" class="btn btn-primary">Browse jobs</a>
+    <a href="{{ route('member.jobs.index') }}" class="btn btn-primary">Browse jobs</a>
 </div>
 
 <div class="mb-5 flex items-center justify-between">
@@ -28,7 +28,7 @@
             <div class="mt-5">
                 <p class="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">{{ $job->category->name ?? 'General' }}</p>
                 <h2 class="mt-2 text-xl leading-7">
-                    <a href="{{ route('freelancer.jobs.show', $job) }}" class="hover:text-emerald-800">{{ $job->title }}</a>
+                    <a href="{{ route('member.jobs.show', $job) }}" class="hover:text-emerald-800">{{ $job->title }}</a>
                 </h2>
                 <p class="mt-1 text-sm text-slate-500">{{ $job->client->name ?? 'CMU Client' }}</p>
             </div>
@@ -59,7 +59,7 @@
                         @endif
                     </p>
                 </div>
-                <a href="{{ route('freelancer.jobs.show', $job) }}" class="btn btn-secondary">View job</a>
+                <a href="{{ route('member.jobs.show', $job) }}" class="btn btn-secondary">View job</a>
             </div>
         </article>
     @empty
@@ -69,7 +69,7 @@
             </div>
             <h2 class="mt-4">No saved jobs yet</h2>
             <p class="mt-2 text-sm text-slate-500">Save opportunities from the job board to revisit them here.</p>
-            <a href="{{ route('freelancer.jobs.index') }}" class="btn btn-primary mt-5">Explore opportunities</a>
+            <a href="{{ route('member.jobs.index') }}" class="btn btn-primary mt-5">Explore opportunities</a>
         </div>
     @endforelse
 </div>

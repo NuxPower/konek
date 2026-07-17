@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Category;
 use App\Models\Job;
 use App\Models\User;
-use App\Models\Category;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Job>
@@ -39,7 +39,7 @@ class JobFactory extends Factory
             'UI/UX Design Project',
             'Digital Marketing Campaign',
             'Web Scraping Project',
-            'Customer Service Support'
+            'Customer Service Support',
         ];
 
         $jobTypes = ['full-time', 'part-time', 'contract', 'freelance'];
@@ -59,7 +59,10 @@ class JobFactory extends Factory
             'is_featured' => fake()->boolean(20), // 20% chance of being featured
             'applications_count' => fake()->numberBetween(0, 50),
             'client_id' => User::factory()->client(),
-            'category_id' => Category::factory(),
+            'category_id' => fn () => Category::query()
+                ->where('is_active', true)
+                ->inRandomOrder()
+                ->value('id') ?? Category::factory(),
             'created_at' => fake()->dateTimeBetween('-6 months', 'now'),
             'updated_at' => fake()->dateTimeBetween('-1 month', 'now'),
         ];

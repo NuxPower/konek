@@ -32,54 +32,54 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // Create default client user
+        // Create default member user focused on posting work
         User::updateOrCreate(
             [
-                'email' => 'client@cmu.edu.ph',
+                'email' => 'poster@cmu.edu.ph',
             ],
             [
-                'name' => 'John Client',
+                'name' => 'John Poster',
                 'email_verified_at' => now(),
                 'password' => Hash::make($demoPassword),
-                'role' => 'client',
+                'role' => 'member',
                 'phone' => '+63 917 123 4567',
-                'bio' => 'Client user for KONEK platform.',
+                'bio' => 'Student member who posts campus work opportunities.',
                 'is_active' => true,
             ]
         );
 
-        // Create default freelancer user
+        // Create default member user focused on finding work
         User::updateOrCreate(
             [
-                'email' => 'freelancer@cmu.edu.ph',
+                'email' => 'applicant@cmu.edu.ph',
             ],
             [
-                'name' => 'Jane Freelancer',
+                'name' => 'Jane Applicant',
                 'email_verified_at' => now(),
                 'password' => Hash::make($demoPassword),
-                'role' => 'freelancer',
+                'role' => 'member',
                 'phone' => '+63 998 765 4321',
-                'bio' => 'Freelancer user for KONEK platform.',
+                'bio' => 'Student member who finds and applies to campus work.',
                 'is_active' => true,
             ]
         );
 
-        // Create additional clients
+        // Create additional members who can both post and apply
         $clients = User::factory()
             ->count(15)
-            ->client()
+            ->member()
             ->cmuEmail()
             ->create();
 
-        // Create additional freelancers
+        // Create additional members who can both post and apply
         $freelancers = User::factory()
             ->count(25)
-            ->freelancer()
+            ->member()
             ->cmuEmail()
             ->create();
 
         $skillIds = Skill::where('is_active', true)->pluck('id');
-        User::where('role', 'freelancer')->get()->each(function (User $user) use ($skillIds) {
+        User::where('role', 'member')->get()->each(function (User $user) use ($skillIds) {
             if ($skillIds->count() >= 3) {
                 $user->skills()->syncWithoutDetaching(
                     $skillIds->random(min(6, $skillIds->count()))

@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Application;
-use App\Models\User;
 use App\Models\Job;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Application>
@@ -24,7 +24,7 @@ class ApplicationFactory extends Factory
             'Hello! I would love to work on this project. I have been working as a freelancer for the past 3 years and have completed numerous similar projects. My expertise in graphic design and attention to detail make me the perfect candidate for this job.',
             'I am interested in this opportunity and believe my skills align perfectly with your requirements. I have a proven track record of delivering high-quality work on time and within budget. I would be happy to discuss how I can contribute to your project.',
             'Greetings! I am a skilled professional with extensive experience in this field. I have successfully completed many projects similar to yours and have received excellent feedback from clients. I am confident I can exceed your expectations.',
-            'I am writing to express my interest in this position. My background in digital marketing and content creation makes me an ideal candidate. I am committed to delivering outstanding results and building long-term professional relationships.'
+            'I am writing to express my interest in this position. My background in digital marketing and content creation makes me an ideal candidate. I am committed to delivering outstanding results and building long-term professional relationships.',
         ];
 
         $statuses = ['pending', 'reviewing', 'shortlisted', 'accepted', 'rejected'];
@@ -39,7 +39,7 @@ class ApplicationFactory extends Factory
             'portfolio_links' => json_encode([
                 'https://github.com/example/project1',
                 'https://portfolio.example.com',
-                'https://behance.net/example'
+                'https://behance.net/example',
             ]),
             'attachments' => null, // Can be populated with file paths if needed
             'reviewed_at' => fake()->boolean(60) ? fake()->dateTimeBetween('-2 weeks', 'now') : null,

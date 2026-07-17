@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<a href="{{ route('freelancer.jobs.index') }}" class="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-emerald-800">
+<a href="{{ route('member.jobs.index') }}" class="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-emerald-800">
     <span aria-hidden="true">←</span> Back to opportunities
 </a>
 
@@ -17,7 +17,7 @@
                         <p class="mt-2 text-sm text-slate-500">{{ $job->client->name ?? 'CMU Client' }} · Posted {{ $job->created_at->diffForHumans() }}</p>
                     </div>
                 </div>
-                <span class="badge badge-success self-start">Accepting applications</span>
+                <span class="inline-flex min-w-44 shrink-0 items-center justify-center rounded-full bg-emerald-100 px-4 py-2 text-center text-xs font-semibold leading-5 text-emerald-800 sm:self-start">Accepting applications</span>
             </div>
 
             <div class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -52,7 +52,7 @@
             <p class="text-sm font-semibold text-slate-900">Interested in this opportunity?</p>
             <p class="mt-2 text-sm leading-6 text-slate-500">Send the client a focused application with your rate and relevant experience.</p>
             @can('apply', $job)
-                <a href="{{ route('freelancer.jobs.apply.create', $job) }}" class="btn btn-primary mt-6 w-full">Apply now</a>
+                <a href="{{ route('member.jobs.apply.create', $job) }}" class="btn btn-primary mt-6 w-full">Apply now</a>
             @else
                 <div class="mt-6 rounded-xl bg-slate-100 px-4 py-3 text-center text-sm font-medium text-slate-500">
                     @if($job->deadline && $job->deadline->isPast())

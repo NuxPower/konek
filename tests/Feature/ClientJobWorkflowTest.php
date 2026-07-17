@@ -19,7 +19,7 @@ class ClientJobWorkflowTest extends TestCase
         $category = Category::factory()->create();
         $skills = Skill::factory()->count(2)->create();
 
-        $response = $this->actingAs($client)->post(route('client.jobs.store'), [
+        $response = $this->actingAs($client)->post(route('member.posted-jobs.store'), [
             ...$this->validJobData($category),
             'skills' => $skills->pluck('id')->all(),
             'submit_action' => 'draft',
@@ -27,7 +27,7 @@ class ClientJobWorkflowTest extends TestCase
 
         $job = Job::where('client_id', $client->id)->firstOrFail();
 
-        $response->assertRedirect(route('client.jobs.show', $job));
+        $response->assertRedirect(route('member.posted-jobs.show', $job));
         $this->assertSame('draft', $job->status);
         $this->assertNull($job->published_at);
         $this->assertEqualsCanonicalizing($skills->pluck('id')->all(), $job->skills()->pluck('skills.id')->all());
@@ -38,7 +38,7 @@ class ClientJobWorkflowTest extends TestCase
         $client = User::factory()->client()->create();
         $category = Category::factory()->create();
 
-        $this->actingAs($client)->post(route('client.jobs.store'), [
+        $this->actingAs($client)->post(route('member.posted-jobs.store'), [
             ...$this->validJobData($category),
             'submit_action' => 'publish',
         ])->assertRedirect();
@@ -63,13 +63,13 @@ class ClientJobWorkflowTest extends TestCase
         ]);
         $job->skills()->attach($oldSkill);
 
-        $response = $this->actingAs($client)->patch(route('client.jobs.update', $job), [
+        $response = $this->actingAs($client)->patch(route('member.posted-jobs.update', $job), [
             ...$this->validJobData($newCategory),
             'title' => 'Updated opportunity title',
             'skills' => $newSkills->pluck('id')->all(),
         ]);
 
-        $response->assertRedirect(route('client.jobs.show', $job));
+        $response->assertRedirect(route('member.posted-jobs.show', $job));
         $job->refresh();
 
         $this->assertSame('Updated opportunity title', $job->title);
@@ -90,7 +90,7 @@ class ClientJobWorkflowTest extends TestCase
 
         foreach (['published', 'paused', 'closed'] as $status) {
             $this->actingAs($client)
-                ->patch(route('client.jobs.status', $job), ['status' => $status])
+                ->patch(route('member.posted-jobs.status', $job), ['status' => $status])
                 ->assertRedirect();
 
             $this->assertSame($status, $job->refresh()->status);
@@ -112,10 +112,10 @@ class ClientJobWorkflowTest extends TestCase
         ]);
         $job->skills()->attach($skills->pluck('id'));
 
-        $response = $this->actingAs($client)->post(route('client.jobs.duplicate', $job));
+        $response = $this->actingAs($client)->post(route('member.posted-jobs.duplicate', $job));
 
         $copy = Job::where('client_id', $client->id)->whereKeyNot($job->id)->firstOrFail();
-        $response->assertRedirect(route('client.jobs.edit', $copy));
+        $response->assertRedirect(route('member.posted-jobs.edit', $copy));
         $this->assertSame('Original opportunity (Copy)', $copy->title);
         $this->assertSame('draft', $copy->status);
         $this->assertNull($copy->published_at);
@@ -127,7 +127,7 @@ class ClientJobWorkflowTest extends TestCase
         $client = User::factory()->client()->create();
         $category = Category::factory()->create();
 
-        $response = $this->actingAs($client)->post(route('client.jobs.store'), [
+        $response = $this->actingAs($client)->post(route('member.posted-jobs.store'), [
             ...$this->validJobData($category),
             'budget_min' => 10000,
             'budget_max' => 5000,
@@ -148,8 +148,8 @@ class ClientJobWorkflowTest extends TestCase
         ]);
 
         $this->actingAs($client)
-            ->delete(route('client.jobs.destroy', $job))
-            ->assertRedirect(route('client.jobs.index'));
+            ->delete(route('member.posted-jobs.destroy', $job))
+            ->assertRedirect(route('member.posted-jobs.index'));
 
         $this->assertDatabaseMissing('jobs', ['id' => $job->id]);
     }

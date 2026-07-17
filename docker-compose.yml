@@ -1,0 +1,14 @@
+services:
+  identity-matcher:
+    build:
+      context: ./docker/identity-matcher
+    environment:
+      IDENTITY_ANALYZER_TOKEN: ${IDENTITY_ANALYZER_TOKEN:-local-dev-token}
+      SCHOOL_ID_REGEX: ${SCHOOL_ID_REGEX:-[A-Za-z0-9][A-Za-z0-9-]*\d[A-Za-z0-9-]*}
+      OCR_CONFIDENCE_THRESHOLD: ${OCR_CONFIDENCE_THRESHOLD:-90}
+      BIOMETRIC_SCORE_THRESHOLD: ${BIOMETRIC_SCORE_THRESHOLD:-90}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-10}
+      INSIGHTFACE_MODEL: ${INSIGHTFACE_MODEL:-buffalo_l}
+      ENABLE_FACE_MODEL: ${ENABLE_FACE_MODEL:-true}
+    ports:
+      - "8001:8000"

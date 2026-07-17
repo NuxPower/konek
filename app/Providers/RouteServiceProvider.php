@@ -14,4 +14,4 @@ class RouteServiceProvider extends ServiceProvider
         // Register custom route bindings or patterns here
         parent::boot();
     }
-} 
+}

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\Profile\UpdateProfileRequest;
+use Illuminate\Http\Request;
 
 class ClientProfileController extends Controller
 {
@@ -14,6 +14,7 @@ class ClientProfileController extends Controller
     public function show(Request $request)
     {
         $user = $request->user();
+
         return view('client.profile.show', compact('user'));
     }
 
@@ -23,6 +24,7 @@ class ClientProfileController extends Controller
     public function edit(Request $request)
     {
         $user = $request->user();
+
         return view('client.profile.edit', compact('user'));
     }
 
@@ -33,6 +35,7 @@ class ClientProfileController extends Controller
     {
         $user = $request->user();
         $user->update($request->validated());
-        return redirect()->route('client.profile.show')->with('success', 'Profile updated successfully.');
+
+        return redirect()->route('member.profile.show')->with('success', 'Profile updated successfully.');
     }
-} 
+}

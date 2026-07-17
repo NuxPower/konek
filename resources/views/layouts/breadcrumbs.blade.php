@@ -1,7 +1,7 @@
 @php
     $routeName = request()->route()?->getName() ?? '';
     $role = auth()->user()->role;
-    $homeRoute = $role.'.dashboard';
+    $homeRoute = $role === 'admin' ? 'admin.dashboard' : 'member.dashboard';
     $parts = explode('.', $routeName);
     $isAccountSettings = str_starts_with($routeName, 'profile.');
     $section = str_starts_with($routeName, 'notifications.')
@@ -10,8 +10,10 @@
     $action = end($parts);
     $sectionLabels = [
         'users' => 'Users',
-        'jobs' => $role === 'client' ? 'My jobs' : 'Jobs',
-        'applications' => $role === 'freelancer' ? 'My applications' : 'Applications',
+        'jobs' => 'Browse jobs',
+        'posted-jobs' => 'My posted jobs',
+        'applications' => 'My applications',
+        'received-applications' => 'Received applications',
         'reports' => 'Reports',
         'activity-logs' => 'Activity logs',
         'profile' => 'Profile',
@@ -27,13 +29,15 @@
     ];
     $sectionRoute = match ($section) {
         'users' => 'admin.users.index',
-        'jobs' => $role.'.jobs.index',
-        'applications' => $role.'.applications.index',
+        'jobs' => $role === 'admin' ? 'admin.jobs.index' : 'member.jobs.index',
+        'posted-jobs' => 'member.posted-jobs.index',
+        'applications' => $role === 'admin' ? 'admin.applications.index' : 'member.applications.index',
+        'received-applications' => 'member.received-applications.index',
         'reports' => 'admin.reports.index',
         'activity-logs' => 'admin.activity-logs.index',
-        'profile' => $role.'.profile.show',
+        'profile' => $role === 'admin' ? null : 'member.profile.show',
         'notifications' => 'notifications.index',
-        'saved-jobs' => 'freelancer.saved-jobs.index',
+        'saved-jobs' => 'member.saved-jobs.index',
         default => null,
     };
 @endphp

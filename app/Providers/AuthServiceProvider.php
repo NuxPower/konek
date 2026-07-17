@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
-use App\Models\User;
-use App\Models\Job;
 use App\Models\Application;
+use App\Models\Job;
+use App\Models\User;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+
 // use App\Policies\UserPolicy;
 // use App\Policies\JobPolicy;
 // use App\Policies\ApplicationPolicy;
@@ -32,4 +32,4 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
         // Register custom gates here
     }
-} 
+}

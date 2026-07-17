@@ -51,7 +51,7 @@ class DashboardTest extends TestCase
         ]);
 
         $this->actingAs($client)
-            ->get(route('client.dashboard'))
+            ->get(route('member.dashboard'))
             ->assertOk()
             ->assertViewHas('applicationsNeedingReview', 1)
             ->assertViewHas('reviewQueue', function ($queue) use ($ownApplication, $otherApplication) {
@@ -79,7 +79,7 @@ class DashboardTest extends TestCase
         ]);
 
         $this->actingAs($freelancer)
-            ->get(route('freelancer.dashboard'))
+            ->get(route('member.dashboard'))
             ->assertOk()
             ->assertViewHas('recommendedJobs', function ($jobs) use ($recommendedJob, $appliedJob, $closedJob) {
                 return $jobs->contains($recommendedJob)
@@ -101,20 +101,20 @@ class DashboardTest extends TestCase
         ]);
 
         $this->actingAs($client)
-            ->getJson(route('client.dashboard.stats'))
+            ->getJson(route('member.dashboard.stats'))
             ->assertOk()
             ->assertJson([
-                'jobs' => 1,
+                'posted_jobs' => 1,
                 'published_jobs' => 1,
-                'applications' => 1,
+                'received_applications' => 1,
                 'applications_needing_review' => 1,
             ]);
 
         $this->actingAs($freelancer)
-            ->getJson(route('freelancer.dashboard.stats'))
+            ->getJson(route('member.dashboard.stats'))
             ->assertOk()
             ->assertJson([
-                'applications' => 1,
+                'submitted_applications' => 1,
                 'active_applications' => 1,
             ]);
     }

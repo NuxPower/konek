@@ -60,7 +60,7 @@ class FreelancerDashboardController extends Controller
             ->take(4)
             ->get();
 
-        return view('freelancer.dashboard', compact(
+        return view('member.dashboard', compact(
             'totalApplications',
             'activeApplications',
             'shortlistedApplications',

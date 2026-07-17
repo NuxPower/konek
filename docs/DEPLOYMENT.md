@@ -119,7 +119,7 @@ composer audit
 npm audit --omit=dev
 ```
 
-Verify login and one primary workflow for each role after deployment.
+Verify login for admin and member accounts, then test both member workflows: posting work and applying to another member's job.
 
 ## Backups and rollback
 

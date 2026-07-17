@@ -7,7 +7,7 @@
     <div><label for="description">Description</label><textarea id="description" rows="7" name="description" required>{{ old('description',$job->description) }}</textarea></div>
     <div><label for="requirements">Requirements</label><textarea id="requirements" rows="6" name="requirements" required>{{ old('requirements',$job->requirements) }}</textarea></div>
     <div class="grid gap-5 sm:grid-cols-2">
-        <div><label for="client_id">Client</label><select id="client_id" name="client_id">@foreach($clients as $client)<option value="{{ $client->id }}" @selected((int) old('client_id',$job->client_id)===$client->id)>{{ $client->name }}</option>@endforeach</select></div>
+        <div><label for="client_id">Posted by</label><select id="client_id" name="client_id">@foreach($clients as $client)<option value="{{ $client->id }}" @selected((int) old('client_id',$job->client_id)===$client->id)>{{ $client->name }}</option>@endforeach</select></div>
         <div><label for="category_id">Category</label><select id="category_id" name="category_id">@foreach($categories as $category)<option value="{{ $category->id }}" @selected((int) old('category_id',$job->category_id)===$category->id)>{{ $category->name }}</option>@endforeach</select></div>
     </div>
     <div class="grid gap-5 sm:grid-cols-3">

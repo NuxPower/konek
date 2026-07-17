@@ -20,7 +20,7 @@
     <section class="panel">
         <div class="panel-header"><h2>Users by role</h2></div>
         <div class="space-y-4">
-            @foreach(['admin', 'client', 'freelancer'] as $role)
+            @foreach(['admin', 'member'] as $role)
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-slate-600">{{ ucfirst($role) }}</span>
                     <strong class="text-slate-900">{{ $userRoleCounts[$role] ?? 0 }}</strong>

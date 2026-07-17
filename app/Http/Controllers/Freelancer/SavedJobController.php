@@ -26,7 +26,9 @@ class SavedJobController extends Controller
     public function store(Request $request, Job $job): RedirectResponse
     {
         abort_unless(
-            $job->status === 'published' && (! $job->deadline || $job->deadline->isFuture()),
+            $job->client_id !== $request->user()->id
+                && $job->status === 'published'
+                && (! $job->deadline || $job->deadline->isFuture()),
             404
         );
 

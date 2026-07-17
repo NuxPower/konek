@@ -19,10 +19,10 @@ class ApplicationWorkflowTest extends TestCase
         $freelancer = User::factory()->freelancer()->create();
         $job = $this->publishedJob($client);
 
-        $response = $this->actingAs($freelancer)->post(route('freelancer.jobs.apply', $job), $this->applicationData());
+        $response = $this->actingAs($freelancer)->post(route('member.jobs.apply', $job), $this->applicationData());
 
         $application = Application::where('job_id', $job->id)->where('freelancer_id', $freelancer->id)->firstOrFail();
-        $response->assertRedirect(route('freelancer.applications.show', $application));
+        $response->assertRedirect(route('member.applications.show', $application));
         $this->assertSame('pending', $application->status);
         $this->assertSame(1, $job->refresh()->applications_count);
     }
@@ -42,7 +42,7 @@ class ApplicationWorkflowTest extends TestCase
         $job->update(['applications_count' => 1]);
 
         $this->actingAs($secondFreelancer)
-            ->post(route('freelancer.jobs.apply', $job), $this->applicationData())
+            ->post(route('member.jobs.apply', $job), $this->applicationData())
             ->assertForbidden();
 
         $this->assertDatabaseCount('applications', 1);
@@ -55,7 +55,7 @@ class ApplicationWorkflowTest extends TestCase
         $application = $this->application($client, $freelancer, 'pending');
 
         $this->actingAs($freelancer)
-            ->patch(route('freelancer.applications.update', $application), [
+            ->patch(route('member.applications.update', $application), [
                 ...$this->applicationData(),
                 'cover_letter' => 'Updated cover letter with enough detail to explain my relevant experience and delivery approach.',
             ])
@@ -66,7 +66,7 @@ class ApplicationWorkflowTest extends TestCase
         $application->update(['status' => 'reviewing']);
 
         $this->actingAs($freelancer)
-            ->patch(route('freelancer.applications.update', $application), $this->applicationData())
+            ->patch(route('member.applications.update', $application), $this->applicationData())
             ->assertForbidden();
     }
 
@@ -78,8 +78,8 @@ class ApplicationWorkflowTest extends TestCase
         $application->job->update(['applications_count' => 1]);
 
         $this->actingAs($freelancer)
-            ->delete(route('freelancer.applications.destroy', $application))
-            ->assertRedirect(route('freelancer.applications.index'));
+            ->delete(route('member.applications.destroy', $application))
+            ->assertRedirect(route('member.applications.index'));
 
         $this->assertDatabaseHas('applications', [
             'id' => $application->id,
@@ -96,7 +96,7 @@ class ApplicationWorkflowTest extends TestCase
 
         foreach (['reviewing', 'shortlisted', 'accepted'] as $status) {
             $this->actingAs($client)
-                ->patch(route('client.applications.status', $application), ['status' => $status])
+                ->patch(route('member.received-applications.status', $application), ['status' => $status])
                 ->assertRedirect();
 
             $this->assertSame($status, $application->refresh()->status);
@@ -113,8 +113,8 @@ class ApplicationWorkflowTest extends TestCase
         $application = $this->application($client, $freelancer, 'accepted');
 
         $this->actingAs($client)
-            ->from(route('client.applications.show', $application))
-            ->patch(route('client.applications.status', $application), ['status' => 'rejected'])
+            ->from(route('member.received-applications.show', $application))
+            ->patch(route('member.received-applications.status', $application), ['status' => 'rejected'])
             ->assertSessionHasErrors('status');
 
         $this->assertSame('accepted', $application->refresh()->status);
@@ -127,7 +127,7 @@ class ApplicationWorkflowTest extends TestCase
         $application = $this->application($client, $freelancer);
 
         $this->actingAs($client)
-            ->patch(route('client.applications.notes', $application), [
+            ->patch(route('member.received-applications.notes', $application), [
                 'client_notes' => 'Strong portfolio. Ask about availability during the interview.',
             ])
             ->assertRedirect();
@@ -147,7 +147,7 @@ class ApplicationWorkflowTest extends TestCase
             $application = $this->application($client, $freelancer, $status);
 
             $this->actingAs($freelancer)
-                ->delete(route('freelancer.applications.destroy', $application))
+                ->delete(route('member.applications.destroy', $application))
                 ->assertForbidden();
         }
     }

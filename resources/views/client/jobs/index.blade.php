@@ -2,7 +2,7 @@
 @section('content')
 <div class="page-header">
     <div><p class="page-eyebrow">Opportunities</p><h1>My jobs</h1><p class="page-subtitle">Create, publish, and manage your open roles.</p></div>
-    <a href="{{ route('client.jobs.create') }}" class="btn btn-primary">Post a job</a>
+    <a href="{{ route('member.posted-jobs.create') }}" class="btn btn-primary">Post a job</a>
 </div>
 <div class="table-wrap">
 <table class="table">
@@ -20,8 +20,8 @@
             <td>{{ $job->applications_count }}</td>
             <td>
                 <div class="flex flex-wrap gap-3">
-                    <a href="{{ route('client.jobs.show', $job) }}">View</a>
-                    <a href="{{ route('client.jobs.edit', $job) }}">Edit</a>
+                    <a href="{{ route('member.posted-jobs.show', $job) }}">View</a>
+                    <a href="{{ route('member.posted-jobs.edit', $job) }}">Edit</a>
                 </div>
             </td>
         </tr>

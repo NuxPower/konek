@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<a href="{{ route('freelancer.applications.index') }}" class="mb-6 inline-flex text-sm font-semibold text-slate-500 hover:text-emerald-800">← Back to my applications</a>
+<a href="{{ route('member.applications.index') }}" class="mb-6 inline-flex text-sm font-semibold text-slate-500 hover:text-emerald-800">← Back to my applications</a>
 <div class="page-header">
     <div>
         <p class="page-eyebrow">Application status</p>
@@ -14,7 +14,7 @@
 <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_310px]">
     <section class="panel">
         @can('update', $application)
-            <form method="POST" action="{{ route('freelancer.applications.update', $application) }}" class="!m-0 !max-w-none !border-0 !bg-transparent !p-0 !shadow-none">
+            <form method="POST" action="{{ route('member.applications.update', $application) }}" class="!m-0 !max-w-none !border-0 !bg-transparent !p-0 !shadow-none">
                 @csrf
                 @method('PATCH')
                 <div>
@@ -62,7 +62,7 @@
             <section class="panel border-amber-100">
                 <p class="text-sm font-semibold text-amber-800">Withdraw application</p>
                 <p class="mt-2 text-sm leading-6 text-slate-500">The client will no longer consider this application. This cannot be reversed.</p>
-                <form method="POST" action="{{ route('freelancer.applications.destroy', $application) }}" class="mt-5 !border-0 !bg-transparent !p-0 !shadow-none" onsubmit="return confirm('Withdraw this application?')">
+                <form method="POST" action="{{ route('member.applications.destroy', $application) }}" class="mt-5 !border-0 !bg-transparent !p-0 !shadow-none" onsubmit="return confirm('Withdraw this application?')">
                     @csrf
                     @method('DELETE')
                     <button class="btn border border-amber-200 bg-white text-amber-800 hover:bg-amber-50 focus:ring-amber-500">Withdraw</button>

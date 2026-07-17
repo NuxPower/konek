@@ -1,7 +1,7 @@
 @props(['job', 'saved' => false, 'compact' => false])
 
 <form method="POST"
-      action="{{ $saved ? route('freelancer.saved-jobs.destroy', $job) : route('freelancer.saved-jobs.store', $job) }}"
+      action="{{ $saved ? route('member.saved-jobs.destroy', $job) : route('member.saved-jobs.store', $job) }}"
       class="!m-0 !max-w-none !border-0 !bg-transparent !p-0 !shadow-none">
     @csrf
     @if($saved)

@@ -41,10 +41,15 @@ class Application extends Model
     }
 
     /**
-     * Get the freelancer (user) that submitted the application.
+     * Get the user that submitted the application.
      */
     public function freelancer()
     {
         return $this->belongsTo(\App\Models\User::class, 'freelancer_id');
     }
-} 
+
+    public function applicant()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'freelancer_id');
+    }
+}

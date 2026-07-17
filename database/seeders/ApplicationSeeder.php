@@ -14,7 +14,7 @@ class ApplicationSeeder extends Seeder
      */
     public function run(): void
     {
-        $freelancers = User::where('role', 'freelancer')->get();
+        $freelancers = User::where('role', 'member')->get();
         $publishedJobs = Job::where('status', 'published')->get();
         $closedJobs = Job::where('status', 'closed')->get();
 
@@ -23,7 +23,7 @@ class ApplicationSeeder extends Seeder
             $applicationsCount = rand(1, 8); // Random number of applications per job
 
             for ($i = 0; $i < $applicationsCount; $i++) {
-                $freelancer = $freelancers->random();
+                $freelancer = $freelancers->where('id', '!=', $job->client_id)->random();
 
                 // Check if freelancer already applied to this job
                 $existingApplication = Application::where('freelancer_id', $freelancer->id)
@@ -96,7 +96,7 @@ class ApplicationSeeder extends Seeder
             $applicationsCount = rand(3, 12); // More applications for closed jobs
 
             for ($i = 0; $i < $applicationsCount; $i++) {
-                $freelancer = $freelancers->random();
+                $freelancer = $freelancers->where('id', '!=', $job->client_id)->random();
 
                 // Check if freelancer already applied to this job
                 $existingApplication = Application::where('freelancer_id', $freelancer->id)
@@ -150,7 +150,7 @@ class ApplicationSeeder extends Seeder
      */
     private function createSampleApplications(): void
     {
-        $freelancers = User::where('role', 'freelancer')->limit(5)->get();
+        $freelancers = User::where('role', 'member')->limit(5)->get();
         $jobs = Job::where('status', 'published')->limit(3)->get();
 
         $sampleApplications = [
@@ -191,9 +191,17 @@ class ApplicationSeeder extends Seeder
 
         foreach ($sampleApplications as $index => $applicationData) {
             if (isset($freelancers[$index]) && isset($jobs[$index])) {
+                $freelancer = $freelancers
+                    ->where('id', '!=', $jobs[$index]->client_id)
+                    ->first();
+
+                if (! $freelancer) {
+                    continue;
+                }
+
                 Application::updateOrCreate(
                     [
-                        'freelancer_id' => $freelancers[$index]->id,
+                        'freelancer_id' => $freelancer->id,
                         'job_id' => $jobs[$index]->id,
                     ],
                     [

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<a href="{{ route('client.jobs.index') }}" class="mb-6 inline-flex text-sm font-semibold text-slate-500 hover:text-emerald-800">← Back to my jobs</a>
+<a href="{{ route('member.posted-jobs.index') }}" class="mb-6 inline-flex text-sm font-semibold text-slate-500 hover:text-emerald-800">← Back to my jobs</a>
 <div class="page-header">
     <div>
         <p class="page-eyebrow">{{ $job->category->name ?? 'Opportunity' }}</p>
@@ -9,8 +9,8 @@
         <p class="page-subtitle">Posted {{ $job->created_at->format('M d, Y') }}</p>
     </div>
     <div class="flex flex-wrap gap-2">
-        <a href="{{ route('client.jobs.edit', $job) }}" class="btn btn-primary">Edit job</a>
-        <form method="POST" action="{{ route('client.jobs.duplicate', $job) }}" class="!m-0 !border-0 !bg-transparent !p-0 !shadow-none">
+        <a href="{{ route('member.posted-jobs.edit', $job) }}" class="btn btn-primary">Edit job</a>
+        <form method="POST" action="{{ route('member.posted-jobs.duplicate', $job) }}" class="!m-0 !border-0 !bg-transparent !p-0 !shadow-none">
             @csrf
             <button class="btn btn-secondary">Duplicate</button>
         </form>
@@ -47,13 +47,13 @@
             @endif
         </p>
         <p class="mt-1 text-sm capitalize text-slate-500">{{ $job->budget_type }}</p>
-        <a href="{{ route('client.applications.index') }}" class="btn btn-secondary mt-6 w-full">Review applications</a>
+        <a href="{{ route('member.received-applications.index') }}" class="btn btn-secondary mt-6 w-full">Review applications</a>
         </section>
 
         <section class="panel">
             <p class="text-sm font-semibold text-slate-900">Job status</p>
             <p class="mt-2 text-sm leading-6 text-slate-500">Control whether freelancers can discover and apply to this job.</p>
-            <form method="POST" action="{{ route('client.jobs.status', $job) }}" class="mt-5 !border-0 !bg-transparent !p-0 !shadow-none">
+            <form method="POST" action="{{ route('member.posted-jobs.status', $job) }}" class="mt-5 !border-0 !bg-transparent !p-0 !shadow-none">
                 @csrf
                 @method('PATCH')
                 <select name="status" onchange="this.form.submit()">
@@ -67,7 +67,7 @@
         <section class="panel border-red-100">
             <p class="text-sm font-semibold text-red-700">Delete job</p>
             <p class="mt-2 text-sm leading-6 text-slate-500">This permanently removes the job and its applications.</p>
-            <form method="POST" action="{{ route('client.jobs.destroy', $job) }}" class="mt-5 !border-0 !bg-transparent !p-0 !shadow-none" onsubmit="return confirm('Delete this job and all associated applications? This cannot be undone.')">
+            <form method="POST" action="{{ route('member.posted-jobs.destroy', $job) }}" class="mt-5 !border-0 !bg-transparent !p-0 !shadow-none" onsubmit="return confirm('Delete this job and all associated applications? This cannot be undone.')">
                 @csrf
                 @method('DELETE')
                 <button class="btn border border-red-200 bg-white text-red-700 hover:bg-red-50 focus:ring-red-500">Delete job</button>

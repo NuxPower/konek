@@ -18,7 +18,7 @@
             <td><span class="badge badge-application-{{ $application->status }}">{{ ucfirst($application->status) }}</span></td>
             <td>{{ $application->created_at->format('M d, Y') }}</td>
             <td>
-                <a href="{{ route('freelancer.applications.show', $application) }}">View</a>
+                <a href="{{ route('member.applications.show', $application) }}">View</a>
             </td>
         </tr>
         @empty

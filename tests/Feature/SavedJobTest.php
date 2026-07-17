@@ -18,7 +18,7 @@ class SavedJobTest extends TestCase
         $job = $this->publishedJob();
 
         $this->actingAs($freelancer)
-            ->post(route('freelancer.saved-jobs.store', $job))
+            ->post(route('member.saved-jobs.store', $job))
             ->assertRedirect();
 
         $this->assertDatabaseHas('saved_jobs', [
@@ -27,7 +27,7 @@ class SavedJobTest extends TestCase
         ]);
 
         $this->actingAs($freelancer)
-            ->delete(route('freelancer.saved-jobs.destroy', $job))
+            ->delete(route('member.saved-jobs.destroy', $job))
             ->assertRedirect();
 
         $this->assertDatabaseMissing('saved_jobs', [
@@ -41,8 +41,8 @@ class SavedJobTest extends TestCase
         $freelancer = User::factory()->freelancer()->create();
         $job = $this->publishedJob();
 
-        $this->actingAs($freelancer)->post(route('freelancer.saved-jobs.store', $job));
-        $this->actingAs($freelancer)->post(route('freelancer.saved-jobs.store', $job));
+        $this->actingAs($freelancer)->post(route('member.saved-jobs.store', $job));
+        $this->actingAs($freelancer)->post(route('member.saved-jobs.store', $job));
 
         $this->assertDatabaseCount('saved_jobs', 1);
     }
@@ -59,7 +59,7 @@ class SavedJobTest extends TestCase
         $otherFreelancer->savedJobs()->attach($otherJob->id);
 
         $this->actingAs($freelancer)
-            ->get(route('freelancer.saved-jobs.index'))
+            ->get(route('member.saved-jobs.index'))
             ->assertOk()
             ->assertSee('My saved opportunity')
             ->assertDontSee('Someone elses saved opportunity')
@@ -73,10 +73,10 @@ class SavedJobTest extends TestCase
         $expiredJob = $this->publishedJob(['deadline' => now()->subDay()]);
 
         $this->actingAs($freelancer)
-            ->post(route('freelancer.saved-jobs.store', $closedJob))
+            ->post(route('member.saved-jobs.store', $closedJob))
             ->assertNotFound();
         $this->actingAs($freelancer)
-            ->post(route('freelancer.saved-jobs.store', $expiredJob))
+            ->post(route('member.saved-jobs.store', $expiredJob))
             ->assertNotFound();
 
         $this->assertDatabaseCount('saved_jobs', 0);

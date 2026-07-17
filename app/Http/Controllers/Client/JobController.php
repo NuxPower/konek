@@ -65,7 +65,7 @@ class JobController extends Controller
         $job = $this->jobService->createJob($data);
 
         return redirect()
-            ->route('client.jobs.show', $job)
+            ->route('member.posted-jobs.show', $job)
             ->with('success', $submitAction === 'publish' ? 'Job published successfully.' : 'Draft saved successfully.');
     }
 
@@ -102,7 +102,7 @@ class JobController extends Controller
         $data = $request->validated();
         $this->jobService->updateJob($job, $data);
 
-        return redirect()->route('client.jobs.show', $job)->with('success', 'Job updated successfully.');
+        return redirect()->route('member.posted-jobs.show', $job)->with('success', 'Job updated successfully.');
     }
 
     /**
@@ -113,7 +113,7 @@ class JobController extends Controller
         $this->authorize('delete', $job);
         $job->delete();
 
-        return redirect()->route('client.jobs.index')->with('success', 'Job deleted successfully.');
+        return redirect()->route('member.posted-jobs.index')->with('success', 'Job deleted successfully.');
     }
 
     /**
@@ -150,6 +150,6 @@ class JobController extends Controller
             ])->all()
         );
 
-        return redirect()->route('client.jobs.edit', $newJob)->with('success', 'Job duplicated.');
+        return redirect()->route('member.posted-jobs.edit', $newJob)->with('success', 'Job duplicated.');
     }
 }

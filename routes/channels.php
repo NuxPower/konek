@@ -1,3 +1,3 @@
 <?php
 
-// Broadcast channel routes go here 
+// Broadcast channel routes go here

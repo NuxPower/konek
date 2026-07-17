@@ -23,7 +23,7 @@ class ApplicationPolicy
     public function review(User $user, Application $application): bool
     {
         return $user->role === 'admin'
-            || ($user->role === 'client' && $application->job()->where('client_id', $user->id)->exists());
+            || ($user->role === 'member' && $application->job()->where('client_id', $user->id)->exists());
     }
 
     public function withdraw(User $user, Application $application): bool
