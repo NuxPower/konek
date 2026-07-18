@@ -40,56 +40,6 @@ class JobBrowseController extends Controller
         return $this->renderJobBoard($request);
     }
 
-    /**
-     * Public job listing (for guests).
-     */
-    public function publicIndex(Request $request)
-    {
-        $jobs = Job::where('status', 'published')->with('category', 'client')->paginate(15);
-
-        return view('jobs.index', compact('jobs'));
-    }
-
-    /**
-     * Public job show (for guests).
-     */
-    public function publicShow(Job $job)
-    {
-        abort_unless($job->status === 'published', 404);
-
-        $job->load('category', 'client', 'skills');
-
-        return view('jobs.show', compact('job'));
-    }
-
-    /**
-     * Public job search (for guests).
-     */
-    public function publicSearch(Request $request)
-    {
-        $query = Job::query()->where('status', 'published');
-        if ($request->filled('q')) {
-            $query->where('title', 'like', '%'.$request->q.'%');
-        }
-        $jobs = $query->with('category', 'client')->paginate(15);
-
-        return view('jobs.search', compact('jobs'));
-    }
-
-    /**
-     * API job search (for AJAX).
-     */
-    public function apiSearch(Request $request)
-    {
-        $query = Job::query()->where('status', 'published');
-        if ($request->filled('q')) {
-            $query->where('title', 'like', '%'.$request->q.'%');
-        }
-        $jobs = $query->with('category', 'client')->paginate(15);
-
-        return response()->json($jobs);
-    }
-
     private function renderJobBoard(Request $request)
     {
         $query = Job::query()
