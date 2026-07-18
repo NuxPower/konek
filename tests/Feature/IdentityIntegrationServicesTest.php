@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Providers\IdentityVerificationServiceProvider;
 use App\Services\Identity\HttpIdentityAnalyzer;
 use App\Services\Sms\SmsApiPhSender;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,6 +17,33 @@ use Tests\TestCase;
 class IdentityIntegrationServicesTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_production_refuses_to_boot_with_log_sms_driver(): void
+    {
+        $originalEnvironment = $this->app['env'];
+        $this->app['env'] = 'production';
+        Config::set('identity.sms.driver', 'log');
+
+        try {
+            (new IdentityVerificationServiceProvider($this->app))->boot();
+            $this->fail('Production boot should reject the log SMS driver.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('log driver exposes OTP codes', $exception->getMessage());
+        } finally {
+            $this->app['env'] = $originalEnvironment;
+        }
+    }
+
+    public function test_http_identity_analyzer_requires_a_token(): void
+    {
+        Config::set('identity.analyzer.driver', 'http');
+        Config::set('identity.analyzer.token');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('IDENTITY_ANALYZER_TOKEN is required');
+
+        (new IdentityVerificationServiceProvider($this->app))->boot();
+    }
 
     public function test_http_identity_analyzer_parses_success_response(): void
     {

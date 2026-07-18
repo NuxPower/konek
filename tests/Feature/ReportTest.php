@@ -82,6 +82,33 @@ class ReportTest extends TestCase
         $this->assertStringNotContainsString('Excluded CSV Member', $response->streamedContent());
     }
 
+    public function test_csv_export_neutralizes_formula_cells(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $dangerousNames = ['=2+2', '+2+2', '-2+2', '@SUM(A1:A2)'];
+
+        foreach ($dangerousNames as $name) {
+            User::factory()->member()->create([
+                'name' => $name,
+                'is_active' => true,
+            ]);
+        }
+
+        $response = $this->actingAs($admin)->post(route('admin.reports.export'), [
+            'report' => 'users',
+            'role' => 'member',
+            'active' => '1',
+        ]);
+
+        $response->assertOk();
+        $rows = array_map('str_getcsv', preg_split('/\r\n|\r|\n/', trim($response->streamedContent())));
+        $exportedNames = array_column(array_slice($rows, 1), 0);
+
+        foreach ($dangerousNames as $name) {
+            $this->assertContains("'{$name}", $exportedNames);
+        }
+    }
+
     public function test_non_admin_cannot_access_or_export_reports(): void
     {
         $freelancer = User::factory()->freelancer()->create();
