@@ -111,9 +111,18 @@ class ReportService
             fwrite($handle, "\xEF\xBB\xBF");
             fputcsv($handle, $headers);
             foreach ($rows as $row) {
-                fputcsv($handle, $row);
+                fputcsv($handle, array_map($this->sanitizeCsvCell(...), $row));
             }
             fclose($handle);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    private function sanitizeCsvCell(mixed $value): mixed
+    {
+        if (is_string($value) && preg_match('/^[=+\-@]/', $value) === 1) {
+            return "'{$value}";
+        }
+
+        return $value;
     }
 }

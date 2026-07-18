@@ -1,3 +1,4 @@
+import hmac
 import os
 import re
 import tempfile
@@ -25,7 +26,9 @@ def configured_token() -> str | None:
 
 def require_token(x_analyzer_token: str | None) -> None:
     token = configured_token()
-    if token and x_analyzer_token != token:
+    if token is None:
+        raise HTTPException(status_code=503, detail="Analyzer token is not configured.")
+    if not hmac.compare_digest(x_analyzer_token or "", token):
         raise HTTPException(status_code=401, detail="Invalid analyzer token.")
 
 
