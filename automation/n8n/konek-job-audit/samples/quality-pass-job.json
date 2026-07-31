@@ -1,0 +1,14 @@
+{
+  "job_id": 42,
+  "title": "Build a modern CMU project website",
+  "description": "We need a developer to design and build a responsive project website with accessible navigation, a clear content structure, and maintainable Laravel components.",
+  "requirements": "Experience with Laravel, responsive interfaces, Git workflows, testing, and clear written communication is required.",
+  "budget_min": "10000.00",
+  "budget_max": "20000.00",
+  "budget_type": "fixed",
+  "status": "published",
+  "deadline": "2099-12-31 23:59:59",
+  "posted_by": "Sample Member",
+  "category": "Web Development"
+}
+

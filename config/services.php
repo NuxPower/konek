@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'n8n' => [
+        'new_job_webhook' => env('N8N_NEW_JOB_WEBHOOK_URL'),
+        'webhook_token' => env('N8N_WEBHOOK_TOKEN'),
+    ],
+
 ];
