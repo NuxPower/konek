@@ -12,3 +12,16 @@ services:
       ENABLE_FACE_MODEL: ${ENABLE_FACE_MODEL:-true}
     ports:
       - "8001:8000"
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    # Local-development integration: host networking lets the native MySQL
+    # node reach KONEK's host MariaDB on 127.0.0.1 without exposing MariaDB.
+    network_mode: host
+    environment:
+      GENERIC_TIMEZONE: Asia/Manila
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:

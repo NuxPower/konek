@@ -1,0 +1,14 @@
+{
+  "headers": {
+    "content-type": "application/json"
+  },
+  "body": {
+    "event": "job.created",
+    "job_id": 42,
+    "title": "Build a modern CMU project website",
+    "posted_by": "Sample Member",
+    "status": "published",
+    "url": "http://localhost:8000/member/jobs/42"
+  }
+}
+

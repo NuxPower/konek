@@ -1,0 +1,14 @@
+{
+  "job_id": 43,
+  "title": "Quick job",
+  "description": "Message me at applicant@example.com for details.",
+  "requirements": "Know PHP.",
+  "budget_min": null,
+  "budget_max": null,
+  "budget_type": "fixed",
+  "status": "published",
+  "deadline": "2020-01-01 00:00:00",
+  "posted_by": "Sample Member",
+  "category": "Web Development"
+}
+

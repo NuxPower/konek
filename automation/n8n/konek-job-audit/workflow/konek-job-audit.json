@@ -1,0 +1,660 @@
+{
+  "id": "leadQualificationChallenge01",
+  "name": "KONEK Job Quality Audit",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "KONEK Job Quality Audit",
+        "formDescription": "Request a quality audit for an existing KONEK marketplace job.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "KONEK job ID",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Requested by",
+              "placeholder": "Your name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Review reason",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Pre-publication quality review"
+                  },
+                  {
+                    "option": "Content quality concern"
+                  },
+                  {
+                    "option": "Routine audit"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Audit job",
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "The KONEK job audit request was received."
+            }
+          }
+        }
+      },
+      "id": "0ce39a90-39dd-48fc-bba2-96971e3d8780",
+      "name": "Manual Job Audit Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -1120,
+        -100
+      ],
+      "webhookId": "konek-manual-job-audit"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "konek-job-audit",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "3a25e727-b8cd-4ea8-8fde-36c82a0b5753",
+      "name": "KONEK Job Created Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        100
+      ],
+      "webhookId": "konek-job-created-audit"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((item) => {\n  const envelope = item.json;\n  const input = envelope.body && typeof envelope.body === 'object'\n    ? { ...envelope, ...envelope.body }\n    : envelope;\n\n  const read = (...keys) => {\n    for (const key of keys) {\n      if (input[key] !== undefined && input[key] !== null) return input[key];\n    }\n    return '';\n  };\n\n  const rawJobId = read('KONEK job ID', 'job_id');\n  const jobId = Number(rawJobId);\n  const validJobId = Number.isInteger(jobId) && jobId > 0;\n  const automatic = read('event') === 'job.created';\n\n  return { json: {\n    job_id: validJobId ? jobId : null,\n    valid_job_id: validJobId,\n    request_source: automatic ? 'KONEK webhook' : 'Manual n8n form',\n    requested_by: String(read('Requested by', 'requested_by', 'posted_by') || 'KONEK automation').trim(),\n    review_reason: String(read('Review reason', 'review_reason') || (automatic ? 'Automatic audit after job creation' : '')).trim(),\n    job_url: String(read('url')).trim(),\n    request_error: validJobId ? '' : 'KONEK job ID must be a positive integer',\n    requested_at: new Date().toISOString()\n  }};\n});"
+      },
+      "id": "f31e2353-3100-461e-993d-01e642a1ffaf",
+      "name": "Normalize Audit Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -860,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2aed0a9f-5007-448b-9306-911a8bc348ba",
+              "leftValue": "={{ $json.valid_job_id }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3dcaeeb0-75fc-4d86-80c5-3dfc2d915870",
+      "name": "Valid Job ID?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -620,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n    jobs.id AS job_id,\n    jobs.title,\n    jobs.description,\n    jobs.requirements,\n    jobs.type,\n    jobs.experience_level,\n    jobs.budget_min,\n    jobs.budget_max,\n    jobs.budget_type,\n    jobs.status,\n    DATE_FORMAT(jobs.deadline, '%Y-%m-%d %H:%i:%s') AS deadline,\n    users.name AS posted_by,\n    categories.name AS category\nFROM jobs\nINNER JOIN users ON users.id = jobs.client_id\nINNER JOIN categories ON categories.id = jobs.category_id\nWHERE jobs.id = $1\nLIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ [$json.job_id] }}"
+        }
+      },
+      "id": "ce1b900f-13db-4eb3-8344-a98f9844b375",
+      "name": "Read KONEK Job",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -380,
+        -100
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const request = $('Normalize Audit Request').first().json;\n\nreturn items.map((item) => {\n  const job = item.json;\n  const jobFound = Number.isInteger(Number(job.job_id)) && Number(job.job_id) > 0;\n\n  if (!jobFound) {\n    return { json: {\n      ...request,\n      job_found: false,\n      title: '',\n      posted_by: '',\n      category: '',\n      job_status: '',\n      quality_score: 0,\n      quality_passed: false,\n      audit_flags: 'No KONEK job matched the supplied ID'\n    }};\n  }\n\n  let score = 100;\n  const flags = [];\n  const penalize = (points, message) => {\n    score -= points;\n    flags.push(message);\n  };\n\n  const title = String(job.title || '').trim();\n  const description = String(job.description || '').trim();\n  const requirements = String(job.requirements || '').trim();\n  const budgetMin = job.budget_min === null ? null : Number(job.budget_min);\n  const budgetMax = job.budget_max === null ? null : Number(job.budget_max);\n  const budgetType = String(job.budget_type || '');\n  const deadline = job.deadline ? new Date(job.deadline) : null;\n  const combinedText = `${description}\\n${requirements}`;\n\n  if (title.length < 10) penalize(15, 'Title is too short');\n  if (description.length < 100) penalize(25, 'Description needs more detail');\n  if (requirements.length < 50) penalize(20, 'Requirements need more detail');\n\n  if (budgetType !== 'negotiable' && (budgetMin === null || budgetMax === null)) {\n    penalize(20, 'Non-negotiable listing is missing a budget range');\n  } else if (budgetMin !== null && budgetMax !== null && budgetMin > budgetMax) {\n    penalize(30, 'Minimum budget exceeds maximum budget');\n  }\n\n  if (!deadline || Number.isNaN(deadline.getTime())) {\n    penalize(10, 'No valid deadline was provided');\n  } else {\n    const remainingDays = (deadline.getTime() - Date.now()) / 86400000;\n    if (remainingDays < 0) penalize(35, 'Deadline has already passed');\n    else if (remainingDays < 3) penalize(15, 'Deadline is less than three days away');\n  }\n\n  const offPlatformContact = /[\\w.+-]+@[\\w.-]+\\.[a-z]{2,}|\\+?63\\d{10}|(?:facebook|telegram|whatsapp)\\s*[:@]/i;\n  if (offPlatformContact.test(combinedText)) {\n    penalize(25, 'Listing contains possible off-platform contact details');\n  }\n\n  score = Math.max(0, score);\n\n  return { json: {\n    ...request,\n    job_found: true,\n    title,\n    posted_by: String(job.posted_by || ''),\n    category: String(job.category || ''),\n    job_status: String(job.status || ''),\n    quality_score: score,\n    quality_passed: score >= 70,\n    audit_flags: flags.length ? flags.join('; ') : 'No quality issues detected',\n    budget_min: budgetMin,\n    budget_max: budgetMax,\n    budget_type: budgetType,\n    deadline: job.deadline || ''\n  }};\n});"
+      },
+      "id": "ace7c615-a39a-460f-a5dc-99b883479ad5",
+      "name": "Evaluate Job Quality",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -140,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "349c96ea-cf99-47ef-a995-f3693096712e",
+              "leftValue": "={{ $json.job_found }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "122b5d16-2c6d-48c8-a3fb-c4ba011fd70a",
+      "name": "Job Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        100,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1396cc74-afaf-48cb-a778-5605d50d0aed",
+              "leftValue": "={{ $json.job_status }}",
+              "rightValue": "published",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c97f90b5-b61b-410e-aaf5-15868ca21ca0",
+      "name": "Job Published?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        340,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "15f959df-08ad-4381-b987-b611d1cc1f63",
+              "leftValue": "={{ $json.quality_passed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "030cb2cb-a3ef-402f-b1aa-8c065a5fc75d",
+      "name": "Quality Passed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        580,
+        -260
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "05a9993d-5e67-429e-a5fc-870dc2e923cd",
+              "name": "audit_status",
+              "value": "Invalid Request",
+              "type": "string"
+            },
+            {
+              "id": "eac211ae-2854-45ba-b366-52d6a950b40d",
+              "name": "next_action",
+              "value": "Enter a positive KONEK job ID",
+              "type": "string"
+            },
+            {
+              "id": "977a18af-caf4-446a-babc-9c378352abf2",
+              "name": "audit_flags",
+              "value": "={{ $json.request_error }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "fb1e7119-3cce-4738-82bb-5449052543f7",
+      "name": "Prepare Invalid Request",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -360,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b61a9968-b64d-4c0c-a28e-f4c34e0e6aaa",
+              "name": "audit_status",
+              "value": "Job Not Found",
+              "type": "string"
+            },
+            {
+              "id": "d92d6f96-52d5-40a5-b12e-da477af79e02",
+              "name": "next_action",
+              "value": "Confirm the job ID exists in KONEK",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "f495e9db-c7ef-4a80-a64a-88b496819f40",
+      "name": "Prepare Job Not Found",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        340,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "23744f82-459a-4b5a-83af-16e83711a052",
+              "name": "audit_status",
+              "value": "Not Published",
+              "type": "string"
+            },
+            {
+              "id": "52ca9c93-b08f-4ceb-b54d-2aa0bdaec637",
+              "name": "next_action",
+              "value": "Review the draft before publication",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "ec95e5e5-8ad7-4189-bd5e-c73cce737f73",
+      "name": "Prepare Not Published",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        580,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b4d5c61d-7555-4ea0-a266-c041f27fb80f",
+              "name": "audit_status",
+              "value": "Passed",
+              "type": "string"
+            },
+            {
+              "id": "3d190ed3-03b5-42dd-b0cc-2c020f375c7e",
+              "name": "next_action",
+              "value": "No manual action required",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "d8b082ee-b556-42d3-8894-6271595f8d16",
+      "name": "Prepare Passed Audit",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        820,
+        -340
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "185d06c4-f076-49cc-a58f-0459b87205a0",
+              "name": "audit_status",
+              "value": "Needs Review",
+              "type": "string"
+            },
+            {
+              "id": "757f3d00-45d0-46e0-99db-f99f302b8841",
+              "name": "next_action",
+              "value": "Admin should review the quality flags",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "960fb0b3-b420-472d-aa4c-fb2f2e096eb1",
+      "name": "Prepare Needs Review",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        820,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Job Audits",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Requested At": "={{ $json.requested_at }}",
+            "Job ID": "={{ $json.job_id }}",
+            "Title": "={{ $json.title }}",
+            "Posted By": "={{ $json.posted_by }}",
+            "Category": "={{ $json.category }}",
+            "Job Status": "={{ $json.job_status }}",
+            "Request Source": "={{ $json.request_source }}",
+            "Requested By": "={{ $json.requested_by }}",
+            "Review Reason": "={{ $json.review_reason }}",
+            "Quality Score": "={{ $json.quality_score }}",
+            "Audit Status": "={{ $json.audit_status }}",
+            "Next Action": "={{ $json.next_action }}",
+            "Audit Flags": "={{ $json.audit_flags }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "dd22205b-f83d-4c56-845b-ce4f7417e495",
+      "name": "Append Job Audit to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1080,
+        -80
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Job Audit Form": {
+      "main": [
+        [
+          {
+            "node": "Normalize Audit Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KONEK Job Created Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Audit Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Audit Request": {
+      "main": [
+        [
+          {
+            "node": "Valid Job ID?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid Job ID?": {
+      "main": [
+        [
+          {
+            "node": "Read KONEK Job",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Invalid Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read KONEK Job": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Job Quality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Job Quality": {
+      "main": [
+        [
+          {
+            "node": "Job Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job Found?": {
+      "main": [
+        [
+          {
+            "node": "Job Published?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Job Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job Published?": {
+      "main": [
+        [
+          {
+            "node": "Quality Passed?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Not Published",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quality Passed?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Passed Audit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Needs Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Invalid Request": {
+      "main": [
+        [
+          {
+            "node": "Append Job Audit to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Job Not Found": {
+      "main": [
+        [
+          {
+            "node": "Append Job Audit to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Not Published": {
+      "main": [
+        [
+          {
+            "node": "Append Job Audit to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Passed Audit": {
+      "main": [
+        [
+          {
+            "node": "Append Job Audit to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Needs Review": {
+      "main": [
+        [
+          {
+            "node": "Append Job Audit to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Job Audit to Google Sheets": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Manila"
+  },
+  "versionId": "cb667bc0-04d2-474f-870f-876ad6f01385",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

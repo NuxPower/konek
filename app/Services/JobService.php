@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Job;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class JobService
 {
@@ -16,7 +18,7 @@ class JobService
      */
     public function createJob(array $data): Job
     {
-        return DB::transaction(function () use ($data) {
+        $job = DB::transaction(function () use ($data) {
             $skills = $data['skills'] ?? [];
             unset($data['skills']);
 
@@ -25,6 +27,43 @@ class JobService
 
             return $job;
         });
+
+        $this->notifyJobPostedWebhook($job);
+
+        return $job;
+    }
+
+    /**
+     * Notify the n8n webhook that a job was posted. Best-effort: a down or
+     * unconfigured webhook must never block job creation.
+     */
+    private function notifyJobPostedWebhook(Job $job): void
+    {
+        $url = config('services.n8n.new_job_webhook');
+
+        if (! $url) {
+            return;
+        }
+
+        try {
+            $request = Http::timeout(3)->acceptJson();
+            $token = config('services.n8n.webhook_token');
+
+            if ($token) {
+                $request = $request->withHeader('X-Konek-Webhook-Token', $token);
+            }
+
+            $request->post($url, [
+                'event' => 'job.created',
+                'job_id' => $job->id,
+                'title' => $job->title,
+                'posted_by' => $job->client?->name,
+                'status' => $job->status,
+                'url' => route('member.jobs.show', $job),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('n8n new-job webhook failed', ['error' => $e->getMessage()]);
+        }
     }
 
     /**
