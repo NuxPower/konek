@@ -7,19 +7,20 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $duplicateGroups = DB::table('categories')
+        $duplicateNames = DB::table('categories')
             ->select('name')
-            ->selectRaw('MIN(id) as keep_id')
-            ->selectRaw('GROUP_CONCAT(id ORDER BY id) as ids')
             ->groupBy('name')
             ->havingRaw('COUNT(*) > 1')
-            ->get();
+            ->pluck('name');
 
-        foreach ($duplicateGroups as $group) {
-            $ids = collect(explode(',', $group->ids))
-                ->map(fn (string $id) => (int) $id)
-                ->filter(fn (int $id) => $id !== (int) $group->keep_id)
-                ->values();
+        foreach ($duplicateNames as $name) {
+            $rows = DB::table('categories')
+                ->where('name', $name)
+                ->orderBy('id')
+                ->pluck('id');
+
+            $keepId = $rows->first();
+            $ids = $rows->slice(1)->values();
 
             if ($ids->isEmpty()) {
                 continue;
@@ -27,11 +28,11 @@ return new class extends Migration
 
             DB::table('jobs')
                 ->whereIn('category_id', $ids)
-                ->update(['category_id' => $group->keep_id]);
+                ->update(['category_id' => $keepId]);
 
             DB::table('skills')
                 ->whereIn('category_id', $ids)
-                ->update(['category_id' => $group->keep_id]);
+                ->update(['category_id' => $keepId]);
 
             DB::table('categories')
                 ->whereIn('id', $ids)
