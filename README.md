@@ -15,7 +15,7 @@ KONEK is a student marketplace for the Central Mindanao University community. Me
 
 ## Requirements
 
-- PHP 8.2 or newer
+- PHP 8.4 or newer
 - Composer 2
 - Node.js 20 or newer
 - npm
